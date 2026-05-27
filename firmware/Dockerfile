@@ -26,13 +26,6 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-camera-info-manager \
     && rm -rf /var/lib/apt/lists/*
 
-# for testing get graphics stuff for pylon viewer
-RUN apt-get update && apt-get install -y \
-    libx11-6 \
-    libxext6 \
-    libxrender1 \
-    libxtst6
-
 # Install Pylon SDK
 RUN wget -q "https://downloads-bsl.baslerweb.com/software/pylon%2026.04/pylon-26.04.1_linux-x86_64_debs.tar.gz" -O /tmp/pylon.tar.gz && \
     mkdir -p /tmp/pylon && \
