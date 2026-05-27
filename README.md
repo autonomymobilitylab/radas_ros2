@@ -44,8 +44,6 @@ Contains a lot of information on many tools used during development. Does not re
 
  3. Reboot the system and relaunch pylonviewer to save the configuration settings. You're now able to see your attached cameras
 
- 4. If this does not work, try using "Add remote GigE camera" and entering the camera's IP-address. Although, this speaks of a different underlying issue. 
-
 ### **Docker**
 
  1. Switch to firmware subfolder:

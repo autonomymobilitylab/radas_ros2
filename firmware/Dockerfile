@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     python3-git \
     git \
     wget \
+    iproute2 \
     libasio-dev \
     build-essential \
     cmake \
@@ -45,11 +46,8 @@ RUN wget -q "https://downloads-bsl.baslerweb.com/software/pylon%2026.04/pylon-26
 WORKDIR /underlay_ws
 RUN mkdir -p src
 
-# Clone Hesai, Pylon, and Ublox
-RUN git clone --recursive https://github.com/HesaiTechnology/HesaiLidar_ROS_2.0.git src/hesai_ros_driver && \
-    git clone https://github.com/basler/pylon-ros-camera.git src/pylon-ros2-camera && \
-    git clone -b ros2 https://github.com/KumarRobotics/ublox.git src/ublox_ros2 && \
-    git clone https://github.com/dawonn/vectornav.git -b ros2
+# Clone Pylon
+RUN git clone https://github.com/basler/pylon-ros-camera.git src/pylon-ros2-camera
 
 # Install dependencies using rosdep
 RUN apt-get update && \
