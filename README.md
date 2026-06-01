@@ -71,3 +71,95 @@ Contains a lot of information on many tools used during development. Does not re
  ```shell
  xhost +local:docker
  ```
+
+ ### **LIDARs** 
+
+ **PandarView2:**
+
+ 1. Make sure device firewalls are turned off, or that LIDAR UDP-port (typically 2368) is allowed:
+
+  ```shell
+  sudo ufw disable
+  sudo iptables -F
+  ```
+
+  > **Note:** Disconnecting and reconnecting the lidar will result in the firewall "resetting", after which you have to allow the port through again. 
+
+ 2. Check for wired IP-address:
+
+  ```shell
+  ip -br addr
+  ```
+
+  > **Note:** For troubleshooting/sanity-checking: you can check that the connected LIDAR is actually sending data to the port with ```sudo tcpdump -i <device_name> -n udp port 2368``` or just use Wireshark
+
+ 3. Hesai default IP-address is ```192.168.1.201``` which when connected to through a browser let's you control the LIDAR's parameters (for models that support WEB UI). Models that don't support ths (such as JT128) need Hesai's LidarUtilities-software to control and change parameters. 
+
+ 4. Launch PandarView2 and choose "Listen for Data" (or Ctrl + R). Host IP can either be "any" or set it to your wired connection's address. 
+
+ 5. Once running, import the angle correction file. 
+
+**Ros2 and Rviz2**
+
+Same network setup as PandarView2-section. 
+
+This guide won't go over creating the workspace, cloning manufacturer drivers/SDK or installing ROS package dependencies. Instead it will go over the most important config files changes for the LIDARs:
+
+ 1. Set IP-addresses. Device IP-address as your configured address, host address as your wired connection address and replace multicast address with just "". All addresses should be written in the form ```"192.168.1.xxx"``` , or as strings. 
+
+ 
+
+ 2. Clear these placeholder paths:
+
+ ```yaml
+ firetimes_path: ""
+ ***
+ channel_fov_filter_path: ""
+ multi_fov_filter_ranges: ""
+ ```
+
+ 3. Download corresponding device correction files and set their filepaths, for example:
+
+ ```yaml
+ correction_file_path: "/home/user/hesai_ws/config/jt128_correction.csv" 
+ ```
+
+ 4. Make sure that the point cloud is actually sent through ros
+
+ ```yaml
+ ros:
+    ros_frame_id: hesai_lidar 
+    ***
+    send_packet_ros: true                               
+    send_point_cloud_ros: true                           
+    send_imu_ros: true   
+ ```
+
+ 5. Check if your frame frequency is set to 0. If it is, change it to a suitable value:
+
+ ```yaml
+ frame_frequency: 10                   
+ default_frame_frequency: 10.0
+ ```
+ 6. Launch the node and run Rviz2. Useful troubleshooting checks include:
+
+ ```shell
+ ros2 topic list
+ ```
+
+ You should see topics such as ```/lidar_points```. Check for topic info and hz:
+
+ ```shell
+ ros2 topic info /lidar_points
+ ros2 topic hz /lidar_points
+ ```
+
+ ```ros2 topic info /lidar_points``` should return 
+
+ ```shell
+ Type: sensor_msgs/msg/PointCloud2
+ Publisher count: 1
+ Subscription count: 1
+ ```
+
+ If hz doesn't return anything, ros is not actually receiving the lidar datastream. 
