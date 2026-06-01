@@ -1,8 +1,27 @@
 services:
+  ptp-grandmaster:
+    build: ./ptp
+    container_name: ptp_grandmaster
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_TIME
+    devices:
+      - /dev/ptp0:/dev/ptp0
+    environment:
+      - PTP_INTERFACE
+    volumes:
+      - ./ptp/ptp4l.conf.template:/etc/linuxptp/ptp4l.conf.template
+    command: sh -c "envsubst < /etc/linuxptp/ptp4l.conf.template > /etc/linuxptp/ptp4l.conf && ptp4l -f /etc/linuxptp/ptp4l.conf"
+    restart: unless-stopped
+
   ros2_dev:
     build: .
     container_name: ros2_jazzy_container
     network_mode: host
+    depends_on:
+      - ptp-grandmaster
     volumes:
       - ./src:/ros2_ws/src
       - ./config:/ros2_ws/config

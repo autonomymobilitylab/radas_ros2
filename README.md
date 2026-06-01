@@ -93,7 +93,7 @@ Contains a lot of information on many tools used during development. Does not re
 
   > **Note:** For troubleshooting/sanity-checking: you can check that the connected LIDAR is actually sending data to the port with ```sudo tcpdump -i <device_name> -n udp port 2368``` or just use Wireshark
 
- 3. Hesai default IP-address is ```192.168.1.201``` which when connected to through a browser let's you control the LIDAR's parameters (for models that support WEB UI). Models that don't support ths (such as JT128) need Hesai's LidarUtilities-software to control and change parameters. 
+ 3. Hesai default IP-address is ```192.168.1.201``` which when connected to through a browser let's you control the LIDAR's parameters (for models that support WEB UI). Models that don't support this (such as JT128) need Hesai's LidarUtilities-software to control and change parameters. 
 
  4. Launch PandarView2 and choose "Listen for Data" (or Ctrl + R). Host IP can either be "any" or set it to your wired connection's address. 
 
@@ -105,9 +105,7 @@ Same network setup as PandarView2-section.
 
 This guide won't go over creating the workspace, cloning manufacturer drivers/SDK or installing ROS package dependencies. Instead it will go over the most important config files changes for the LIDARs:
 
- 1. Set IP-addresses. Device IP-address as your configured address, host address as your wired connection address and replace multicast address with just "". All addresses should be written in the form ```"192.168.1.xxx"``` , or as strings. 
-
- 
+ 1. Set IP-addresses. Device IP-address as your configured address, host address as your wired connection address and replace multicast address with just "". All addresses should be written in the form ```"192.168.1.xxx"``` , and as strings. 
 
  2. Clear these placeholder paths:
 
@@ -163,3 +161,21 @@ This guide won't go over creating the workspace, cloning manufacturer drivers/SD
  ```
 
  If hz doesn't return anything, ros is not actually receiving the lidar datastream. 
+> **Note:** ros2 topic hz takes a few moments to calculate the frequency of data, don't expect instantaneous result.
+
+ ### **PTP**
+ **Setting up nuc as PTP grandmaster**
+
+ PTP is automatically set up when running ```docker compose up --build -d``` in a secondary container parallel to the main ros2 container. If you wish to manually broadcast PTP from your device for testing etc you can use:
+ ```shell
+ sudo PTP4l -i <device> -m -S
+ ```
+ 
+ The automatic PTP setup assumes that you have an ```.env``` file in your ```./firmware``` folder with the key ```PTP_INTERFACE=<device>```
+
+ Both the JT128 and XT32M lidars format their timestamps in the data stream the same way, which you can find with the following steps.
+ 1. From the end of the data packet find the manufacturer magic number ```42```.
+ 2. Move back 10 bits.
+ 3. First bit is ```year - 1900```.
+ 4. Next 5 bits are in the order of: ```month, day, hour, minute, second```.
+ 5. Next 4 bits are the microsecond part of UTC.
