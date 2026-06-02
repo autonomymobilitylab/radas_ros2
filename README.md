@@ -66,7 +66,7 @@ Contains a lot of information on many tools used during development. Does not re
  docker compose exec ros2_dev /bin/bash
  ```
 
- 4. If you want to use GUI apps inside the docker container run this before step 3.
+ 4. If you want to use GUI apps inside the docker container run this before step 3. When running things remotely using ssh this needs to be ran on the local system before ssh connection is established.
 
  ```shell
  xhost +local:docker
@@ -179,3 +179,6 @@ This guide won't go over creating the workspace, cloning manufacturer drivers/SD
  3. First bit is ```year - 1900```.
  4. Next 5 bits are in the order of: ```month, day, hour, minute, second```.
  5. Next 4 bits are the microsecond part of UTC.
+
+ ### **SSH ACCESS TO NUC**
+ The MS-01 nuc is set to accept ssh traffic on the default port. Connection details can be found physically at the machine. If display is required add ```-X``` flag before ```username@ip```.
