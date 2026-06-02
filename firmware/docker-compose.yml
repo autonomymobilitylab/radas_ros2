@@ -29,8 +29,10 @@ services:
       - ws_build:/ros2_ws/build
       - ws_install:/ros2_ws/install
       - ws_log:/ros2_ws/log
+      - ${HOME}/.Xauthority:/root/.Xauthority
     environment:
       - DISPLAY=$DISPLAY
+      - XAUTHORITY=/root/.Xauthority
     stdin_open: true
     tty: true
     privileged: true
