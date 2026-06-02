@@ -180,5 +180,9 @@ This guide won't go over creating the workspace, cloning manufacturer drivers/SD
  4. Next 5 bits are in the order of: ```month, day, hour, minute, second```.
  5. Next 4 bits are the microsecond part of UTC.
 
- ### **SSH ACCESS TO NUC**
- The MS-01 nuc is set to accept ssh traffic on the default port. Connection details can be found physically at the machine. If display is required add ```-X``` flag before ```username@ip```.
+ ### **SSH access to NUC**
+ The MS-01 NUC is set to accept SSH traffic on the default port. Connection details can be found physically on the machine. If a display is required, add the `-X` flag before `username@ip`.
+
+ For ease of development, local changes can be pushed to the NUC using `./firmware/sync_to_nuc.sh`. This allows changes made on the local system to be pushed to the NUC without going through GitHub.
+ 
+ This script should only be used during development and for quick tests. **Working, finalized code should always be manually committed and pulled to the NUC.** Before pulling on the NUC, run `git restore .` to revert to the latest published version.
