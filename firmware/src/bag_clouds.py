@@ -3,6 +3,7 @@ from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
 from rclpy.serialization import serialize_message
 from sensor_msgs.msg import PointCloud2
+from sensor_msgs.msg import Imu
 import rosbag2_py
 import os
 import shutil
@@ -37,6 +38,13 @@ class cloud_recorder(Node):
             )
             self.writer.create_topic(topic_info)
 
+        topic_info = rosbag2_py.TopicMetadata(
+            id=0,
+            name = '/lidar_imu_jt',
+            type = 'sensor_msgs/msg/Imu',
+            serialization_format='cdr'
+        )
+        self.writer.create_topic(topic_info)
 
         self.create_subscription(
             PointCloud2, '/lidar_points_xt',
@@ -46,6 +54,12 @@ class cloud_recorder(Node):
         self.create_subscription(
             PointCloud2, '/lidar_points_jt',
             lambda msg: self._write_msg('/lidar_points_jt', msg),
+            qos_profile_sensor_data
+        )
+
+        self.create_subscription(
+            Imu, '/lidar_imu_jt',
+            lambda msg: self._write_msg('/lidar_imu_jt', msg),
             qos_profile_sensor_data
         )
 

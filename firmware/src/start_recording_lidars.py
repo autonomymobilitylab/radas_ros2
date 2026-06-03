@@ -3,7 +3,6 @@ from launch_ros.actions import Node
 from launch.actions import ExecuteProcess
 
 def generate_launch_description():
-    rviz_config='/ros2_ws/config/rviz2.rviz'
     yaml_config_xt='/ros2_ws/config/config_xt.yaml'
     yaml_config_jt='/ros2_ws/config/config_jt.yaml'
     return LaunchDescription([
@@ -38,8 +37,6 @@ def generate_launch_description():
                        '--child-frame-id', 'hesai_lidar_jt']
         ),
 
-        # You can enable/disable either rosbag2 or rviz2 here
-        #Node(namespace='rviz2', package='rviz2', executable='rviz2', arguments=['-d', rviz_config])
         ExecuteProcess(
             cmd=['python3', '/ros2_ws/src/bag_clouds.py'],
             name='cloud_recorder',
