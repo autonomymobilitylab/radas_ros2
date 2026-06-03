@@ -10,8 +10,6 @@ import shutil
 class cloud_reader(Node):
     def __init__(self):
         super().__init__('cloud_reader')
-        import os
-        self.get_logger().info(f'CWD: {os.getcwd()}')
         self.reader = rosbag2_py.SequentialReader()
         storage_options = rosbag2_py.StorageOptions(
             uri='clouds',
