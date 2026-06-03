@@ -4,6 +4,8 @@ from rclpy.qos import qos_profile_sensor_data
 from rclpy.serialization import serialize_message
 from sensor_msgs.msg import PointCloud2
 import rosbag2_py
+import os
+import shutil
 
 
 class cloud_recorder(Node):
@@ -15,6 +17,10 @@ class cloud_recorder(Node):
             uri = 'clouds',
             storage_id = 'mcap'
         )
+
+        if os.path.exists('clouds'):
+            self.get_logger().info('Removing existing bag directory...')
+            shutil.rmtree('clouds')
 
         converter_options = rosbag2_py.ConverterOptions(
             input_serialization_format='cdr',
