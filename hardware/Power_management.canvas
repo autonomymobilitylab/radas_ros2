@@ -1,0 +1,29 @@
+{
+	"nodes":[
+		{"id":"30d1ead6d25277ae","x":-265,"y":-102,"width":139,"height":60,"color":"1","type":"text","text":"12 ish V akku"},
+		{"id":"e25e3c0e0a4bf9b0","x":-20,"y":-102,"width":191,"height":60,"color":"2","type":"text","text":"12 to 12 muuntaja 10A 120W"},
+		{"id":"86be4a5f8d01fb79","x":-20,"y":70,"width":191,"height":60,"color":"2","type":"text","text":"12 to 19 muuntaja 10A 190W"},
+		{"id":"abacd8560f5db9c4","x":-20,"y":-270,"width":191,"height":60,"color":"2","type":"text","text":"12 to 52 muuntaja 5A 260W"},
+		{"id":"eb0144654957d03f","x":300,"y":-162,"width":129,"height":60,"color":"4","type":"text","text":"Dome Lidar"},
+		{"id":"d62210590f7a4aea","x":300,"y":70,"width":79,"height":60,"color":"3","type":"text","text":"NUC"},
+		{"id":"01ceaf0e6962ff63","x":300,"y":-270,"width":94,"height":60,"color":"3","type":"text","text":"Switch"},
+		{"id":"8a9fb596b0a8f7b9","x":580,"y":70,"width":75,"height":60,"color":"4","type":"text","text":"IMU"},
+		{"id":"ce9d2ed220be9719","x":580,"y":160,"width":85,"height":60,"color":"4","type":"text","text":"GNSS"},
+		{"id":"3cdd67ad68f7a3ff","x":580,"y":-270,"width":98,"height":60,"color":"4","type":"text","text":"3x RGB"},
+		{"id":"1cc124ae9ca5f236","x":580,"y":-360,"width":72,"height":60,"color":"4","type":"text","text":"NIR"},
+		{"id":"b832b24678d19e62","x":303,"y":-42,"width":124,"height":60,"color":"4","type":"text","text":"Hemi Lidar"}
+	],
+	"edges":[
+		{"id":"2804db47e169536a","fromNode":"30d1ead6d25277ae","fromSide":"right","toNode":"abacd8560f5db9c4","toSide":"left","label":"10-20V"},
+		{"id":"21cbff9f83e8079b","fromNode":"30d1ead6d25277ae","fromSide":"right","toNode":"e25e3c0e0a4bf9b0","toSide":"left","label":"8-40V"},
+		{"id":"94a600b516a580ef","fromNode":"30d1ead6d25277ae","fromSide":"right","toNode":"86be4a5f8d01fb79","toSide":"left","label":"9-16V"},
+		{"id":"0e4d1aa7a04f75df","fromNode":"86be4a5f8d01fb79","fromSide":"right","toNode":"d62210590f7a4aea","toSide":"left","label":"9.5A/180W"},
+		{"id":"9ddccfa9542b6164","fromNode":"d62210590f7a4aea","fromSide":"right","toNode":"8a9fb596b0a8f7b9","toSide":"left","label":"?A/?W"},
+		{"id":"532284ef99cac6b7","fromNode":"d62210590f7a4aea","fromSide":"right","toNode":"ce9d2ed220be9719","toSide":"left","label":"?A/?W"},
+		{"id":"940852b5a578ab3e","fromNode":"abacd8560f5db9c4","fromSide":"right","toNode":"01ceaf0e6962ff63","toSide":"left","label":"4A/210W"},
+		{"id":"555b7bedb9b38b72","fromNode":"01ceaf0e6962ff63","fromSide":"right","toNode":"3cdd67ad68f7a3ff","toSide":"left","label":"276mA/13.2W"},
+		{"id":"859d8b111ebdb155","fromNode":"01ceaf0e6962ff63","fromSide":"right","toNode":"1cc124ae9ca5f236","toSide":"left","label":"54 mA/2.6W"},
+		{"id":"8057fa5b8572b857","fromNode":"e25e3c0e0a4bf9b0","fromSide":"right","toNode":"eb0144654957d03f","toSide":"left","label":"4A/48W"},
+		{"id":"1e14361b07b0ec78","fromNode":"e25e3c0e0a4bf9b0","fromSide":"right","toNode":"b832b24678d19e62","toSide":"left","label":"4A/48W"}
+	]
+}
