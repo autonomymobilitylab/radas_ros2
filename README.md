@@ -251,3 +251,72 @@ This guide won't go over creating the workspace, cloning manufacturer drivers/SD
  sudo systemctl daemon-reload
  ```
  
+### **STATUS PAGE**
+
+The status page provides a web interface for controlling data collection and monitoring sensor status.
+
+ 1. Create and activate a Python virtual environment:
+
+ ```shell
+ python3 -m venv .venv
+ source .venv/bin/activate
+ ```
+
+ 2. Install dependencies:
+
+ ```shell
+ pip install -r src/requirements.txt
+ ```
+
+ 3. Launch the web server:
+
+ ```shell
+ python3 -m uvicorn src.webUI.app:app --host 0.0.0.0 --port 8080
+ ```
+
+ 4. Remember to allow the port on the firewall
+ ```shell
+ sudo iptables -I INPUT 5 -p tcp --dport 8080 -j ACCEPT
+ ```
+
+ 5. Open a browser and navigate to:
+
+ ```text
+ http://localhost:8080
+ ```
+
+ or replace ```localhost``` with the host machine's IP-address if accessing remotely.
+
+ 5. Use the **Start Collecting Data** and **Stop Collecting Data** buttons to control data collection.
+
+ > **Note:** These buttons call the ROS2 service ```/set_data_collection_enabled```. The service must be running before the web interface can control data collection.
+
+ 6. Verify sensor status from the diagnostics table. The page updates automatically once per second and displays:
+
+ - Collection Enabled
+ - Lidar 1 Hz
+ - Lidar 2 Hz
+ - Camera 1 Hz
+ - Camera 2 Hz
+ - Camera 3 Hz
+ - IMU Hz
+ - GNSS Hz
+
+ Useful troubleshooting commands include:
+
+ ```shell
+ ros2 topic list
+ ros2 topic hz <topic_name>
+ ```
+
+ Check that the data collection service is available:
+
+ ```shell
+ ros2 service list | grep set_data_collection_enabled
+ ```
+
+ Fake data can be send for testing purposes using:
+
+ ```shell
+ ros2 topic pub /diagnostics diagnostic_msgs/msg/DiagnosticArray "{status: [{level: 0, name: sensor_status, message: OK, hardware_id: radas, values: [{key: lidar_1_hz, value: '10.1'}, {key: lidar_2_hz, value: '10.0'}, {key: camera_1_hz, value: '30.0'}, {key: camera_2_hz, value: '29.8'}, {key: camera_3_hz, value: '30.2'}, {key: imu_hz, value: '200.0'}, {key: gnss_hz, value: '5.0'}]}]}"
+ ```

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Radas Web Interface</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Radas Web Interface</h1>
+    
+    <button onclick="startCollecting()">
+        Start Collecting Data
+    </button>
+
+    <button onclick="stopCollecting()">
+        Stop Collecting Data
+    </button>
+
+    <div id="recording">
+        Data collection has not been started yet.
+    </div>
+    <div id="status">
+        Ready
+    </div>
+
+    <script>
+        async function startCollecting() {
+            const response = await fetch('/datacollection/start',
+                { method: 'POST' }
+            );
+
+            const data = await response.json();
+
+            document.getElementById('recording').innerText = "Data collection started.";
+        }
+
+        async function stopCollecting() {
+            const response = await fetch('/datacollection/stop',
+                { method: 'POST' }
+            );
+            const data = await response.json();
+            document.getElementById('recording').innerText = "Data collection stopped.";
+        }
+    </script>
+
+    <h2>Status</h2>
+    <div class="status-wrapper">
+        <table class="status-table">
+            <tr><td>Lidar 1 Hz</td><td id="lidar_1_hz">--</td></tr>
+            <tr><td>Lidar 2 Hz</td><td id="lidar_2_hz">--</td></tr>
+            <tr><td>Camera 1 Hz</td><td id="camera_1_hz">--</td></tr>
+            <tr><td>Camera 2 Hz</td><td id="camera_2_hz">--</td></tr>
+            <tr><td>Camera 3 Hz</td><td id="camera_3_hz">--</td></tr>
+            <tr><td>IMU Hz</td><td id="imu_hz">--</td></tr>
+            <tr><td>GNSS Hz</td><td id="gnss_hz">--</td></tr>
+        </table>
+    </div>
+    <script>
+    async function updateDiagnostics() {
+        const response = await fetch('/diagnostics');
+        const data = await response.json();
+
+        for (const key of [
+            'lidar_1_hz',
+            'lidar_2_hz',
+            'camera_1_hz',
+            'camera_2_hz',
+            'camera_3_hz',
+            'imu_hz',
+            'gnss_hz'
+        ]) {
+            const el = document.getElementById(key);
+            if (el) {
+                el.innerText = data[key] ?? '--';
+            }
+        }
+        
+        const statusEl = document.getElementById('status');
+
+        if (!data.last_update) {
+            statusEl.innerText = "Awaiting sensor data...";
+        }
+        else {
+            const age = Date.now()/1000 - data.last_update;
+
+            if (age > 5) {
+                statusEl.innerText = "Sensor data timeout";
+            }
+            else {
+                statusEl.innerText = "Sensors online";
+            }
+        }
+
+        const recordingEl = document.getElementById('recording');
+
+        if (data.recording_message) {
+            recordingEl.innerText = data.recording_message;
+        }
+    }
+
+    setInterval(updateDiagnostics, 1000);
+    updateDiagnostics();
+    </script>
+</body>
+</html>
