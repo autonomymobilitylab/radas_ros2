@@ -2,7 +2,9 @@ from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
+
 from pathlib import Path
+from pyftdi.gpio import GpioAsyncController
 import threading
 import time
 
@@ -30,6 +32,11 @@ diagnostic_data = {
     "recording_message": "Data collection has not been started yet.",
 }
 
+# URL format: ftdi://vendor:product/interface
+# 0x0403:0x6014 is FT232H; interface 1 is ADBUS (GPIO AD0..AD7)
+gpio = GpioAsyncController()
+gpio.configure('ftdi://0x0403:0x6014/1', direction=0x01)  # AD0 output
+gpio.write(0x00)
 
 class WebUINode(Node):
     def __init__(self):
@@ -121,6 +128,7 @@ async def get_diagnostics():
 async def start_data_collection():
     diagnostic_data["collection_enabled"] = "true"
     diagnostic_data["recording_message"] = "Data collection started."
+    gpio.write(0x01)  # AD0 high
     return ros_node.set_data_collection(True)
 
 
@@ -128,4 +136,5 @@ async def start_data_collection():
 async def stop_data_collection():
     diagnostic_data["collection_enabled"] = "false"
     diagnostic_data["recording_message"] = "Data collection stopped."
+    gpio.write(0x00)  # AD0 low
     return ros_node.set_data_collection(False)

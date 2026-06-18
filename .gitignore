@@ -59,3 +59,4 @@ firmware/src/log
 /log
 firmware/install
 firmware/output_data
+.env

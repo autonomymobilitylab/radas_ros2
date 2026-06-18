@@ -157,3 +157,4 @@ typing_extensions==4.15.0
 unique-identifier-msgs==2.5.0
 uvicorn==0.49.0
 visualization-msgs==5.3.7
+pyftdi
