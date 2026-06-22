@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Radas Web Interface</title>
 
@@ -7,9 +8,10 @@
 
     <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
     <h1>Radas Web Interface</h1>
-    
+
     <button onclick="startCollecting()">
         Start Collecting Data
     </button>
@@ -18,6 +20,7 @@
         Stop Collecting Data
     </button>
 
+    <h2>Data Collection Status</h2>
     <div id="recording">
         Data collection has not been started yet.
     </div>
@@ -33,7 +36,7 @@
 
             const data = await response.json();
 
-            document.getElementById('recording').innerText = "Data collection started.";
+            document.getElementById('recording').innerText = data.message || "Data collection started.";
         }
 
         async function stopCollecting() {
@@ -41,67 +44,87 @@
                 { method: 'POST' }
             );
             const data = await response.json();
-            document.getElementById('recording').innerText = "Data collection stopped.";
+            document.getElementById('recording').innerText = data.message || "Data collection stopped.";
         }
     </script>
 
-    <h2>Status</h2>
-    <div class="status-wrapper">
-        <table class="status-table">
-            <tr><td>Lidar 1 Hz</td><td id="lidar_1_hz">--</td></tr>
-            <tr><td>Lidar 2 Hz</td><td id="lidar_2_hz">--</td></tr>
-            <tr><td>Camera 1 Hz</td><td id="camera_1_hz">--</td></tr>
-            <tr><td>Camera 2 Hz</td><td id="camera_2_hz">--</td></tr>
-            <tr><td>Camera 3 Hz</td><td id="camera_3_hz">--</td></tr>
-            <tr><td>IMU Hz</td><td id="imu_hz">--</td></tr>
-            <tr><td>GNSS Hz</td><td id="gnss_hz">--</td></tr>
-        </table>
-    </div>
     <script>
-    async function updateDiagnostics() {
-        const response = await fetch('/diagnostics');
-        const data = await response.json();
+        function levelLabel(level) {
+            if (level === 0) return "Good";
+            if (level === 1) return "Warning";
+            if (level === 2) return "Error";
+            if (level === 3) return "Stale";
+            return "Unknown";
+        }
 
-        for (const key of [
-            'lidar_1_hz',
-            'lidar_2_hz',
-            'camera_1_hz',
-            'camera_2_hz',
-            'camera_3_hz',
-            'imu_hz',
-            'gnss_hz'
-        ]) {
-            const el = document.getElementById(key);
-            if (el) {
-                el.innerText = data[key] ?? '--';
+        function renderSensorSummary(sensors) {
+            const tbody = document.getElementById("sensor-summary-body");
+            tbody.innerHTML = "";
+
+            for (const sensor of sensors) {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${sensor.emoji}</td>
+                    <td>${sensor.name}</td>
+                    <td>${levelLabel(sensor.level)}</td>
+                    <td class="hz-column">${sensor.hz ?? "--"} / ${sensor.expected_hz ?? "--"} Hz</td>
+                    <td>${sensor.show_ptp ? (sensor.ptp ?? "--") : "N/A"}</td>
+                `;
+
+                tbody.appendChild(row);
             }
         }
-        
-        const statusEl = document.getElementById('status');
+    </script>
+    <h2>Sensor Status</h2>
 
-        if (!data.last_update) {
-            statusEl.innerText = "Awaiting sensor data...";
-        }
-        else {
-            const age = Date.now()/1000 - data.last_update;
+    <table class="status-table">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Sensor</th>
+                <th>Level</th>
+                <th>Hz</th>
+                <th>PTP</th>
+            </tr>
+        </thead>
+        <tbody id="sensor-summary-body"></tbody>
+    </table>
 
-            if (age > 5) {
-                statusEl.innerText = "Sensor data timeout";
+    <script>
+
+        async function updateDiagnostics() {
+            const response = await fetch('/diagnostics');
+            const data = await response.json();
+
+            renderSensorSummary(data.sensors || []);
+
+            const statusEl = document.getElementById('status');
+
+            if (!data.last_update) {
+                statusEl.innerText = "Awaiting aggregated diagnostics...";
             }
             else {
-                statusEl.innerText = "Sensors online";
+                const age = Date.now() / 1000 - data.last_update;
+
+                if (age > 5) {
+                    statusEl.innerText = "Diagnostics: timeout";
+                }
+                else {
+                    statusEl.innerText = `Diagnostics: ${data.overall_status || 'UNKNOWN'}`;
+                }
+            }
+
+            const recordingEl = document.getElementById('recording');
+
+            if (data.recording_message) {
+                recordingEl.innerText = data.recording_message;
             }
         }
 
-        const recordingEl = document.getElementById('recording');
-
-        if (data.recording_message) {
-            recordingEl.innerText = data.recording_message;
-        }
-    }
-
-    setInterval(updateDiagnostics, 1000);
-    updateDiagnostics();
+        setInterval(updateDiagnostics, 1000);
+        updateDiagnostics();
     </script>
 </body>
+
 </html>

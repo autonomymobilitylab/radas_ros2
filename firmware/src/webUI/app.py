@@ -19,24 +19,101 @@ app = FastAPI()
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
+EXPECTED_HZ = {
+    "lidar": 10.0,
+    "camera": 10.0,
+    "imu": 1000.0,
+    "gnss": 10.0,
+}
+
+
+def classify_sensor_type(name: str) -> str | None:
+    n = name.lower()
+
+    if "lidar" in n:
+        return "lidar"
+    if "camera" in n:
+        return "camera"
+    if "imu" in n:
+        return "imu"
+    if "gnss" in n or "gps" in n:
+        return "gnss"
+
+    return None
+
+
+def parse_float(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def level_from_hz(hz, expected_hz):
+    if hz is None or expected_hz is None:
+        return None
+
+    ratio = hz / expected_hz
+
+    if ratio <= 0.70:
+        return 2  # ERROR
+    if ratio < 0.90:
+        return 1  # WARN
+
+    return 0  # OK
+
+
+def worst_level(*levels):
+    valid = [level for level in levels if level is not None]
+    return max(valid) if valid else 3
+
+
+def diagnostic_level_to_text(level) -> str:
+    level = normalize_level(level)
+
+    if level == 0:
+        return "OK"
+    if level == 1:
+        return "WARN"
+    if level == 2:
+        return "ERROR"
+    if level == 3:
+        return "STALE"
+    return "UNKNOWN"
+
 
 diagnostic_data = {
-    "lidar_1_hz": None,
-    "lidar_2_hz": None,
-    "camera_1_hz": None,
-    "camera_2_hz": None,
-    "camera_3_hz": None,
-    "imu_hz": None,
-    "gnss_hz": None,
+    "diagnostics": {},
+    "raw": [],
+    "sensors": [],
+    "overall_level": 3,
+    "overall_status": "STALE",
     "last_update": None,
+    "start_time": None,
+    "collection_enabled": "false",
     "recording_message": "Data collection has not been started yet.",
 }
+
+
+def normalize_level(level):
+    if isinstance(level, int):
+        return level
+
+    if isinstance(level, bytes):
+        return level[0] if level else 3
+
+    if isinstance(level, str):
+        return ord(level[0]) if level else 3
+
+    return 3
+
 
 # URL format: ftdi://vendor:product/interface
 # 0x0403:0x6014 is FT232H; interface 1 is ADBUS (GPIO AD0..AD7)
 gpio = GpioAsyncController()
-gpio.configure('ftdi://0x0403:0x6014/1', direction=0x01)  # AD0 output
+gpio.configure("ftdi://0x0403:0x6014/1", direction=0x01)  # AD0 output
 gpio.write(0x00)
+
 
 class WebUINode(Node):
     def __init__(self):
@@ -44,14 +121,17 @@ class WebUINode(Node):
 
         self.data_collection_client = self.create_client(
             SetBool,
-            "/set_data_collection_enabled"
+            "/set_data_collection_enabled",
         )
 
+        # Subscribe to the standard diagnostic_aggregator output.
+        # Sensor nodes should publish raw diagnostic_msgs/DiagnosticArray on /diagnostics.
+        # diagnostic_aggregator groups them and republishes the aggregate tree here.
         self.create_subscription(
             DiagnosticArray,
-            "/diagnostics",
+            "/diagnostics_agg",
             self.diagnostics_callback,
-            10
+            10,
         )
 
     def diagnostics_callback(self, msg: DiagnosticArray):
@@ -59,16 +139,101 @@ class WebUINode(Node):
 
         diagnostic_data["last_update"] = time.time()
 
+        diagnostics = {}
+        raw = []
+        sensors = []
+        overall_levels = []
+
         for status in msg.status:
-            for kv in status.values:
-                if kv.key in diagnostic_data:
-                    diagnostic_data[kv.key] = kv.value
+            values = {kv.key: kv.value for kv in status.values}
+
+            sensor_type = classify_sensor_type(status.name)
+            hz = parse_float(values.get("hz"))
+            expected_hz = EXPECTED_HZ.get(sensor_type) if sensor_type else None
+            hz_level = level_from_hz(hz, expected_hz)
+            diag_level = normalize_level(status.level)
+            final_level = worst_level(diag_level, hz_level)
+            final_level_text = diagnostic_level_to_text(final_level)
+
+            diagnostic_item = {
+                "name": status.name,
+                "level": final_level,
+                "level_text": final_level_text,
+                "diag_level": diag_level,
+                "diag_level_text": diagnostic_level_to_text(diag_level),
+                "hz_level": hz_level,
+                "hz_level_text": diagnostic_level_to_text(hz_level)
+                if hz_level is not None
+                else None,
+                "message": status.message,
+                "hardware_id": status.hardware_id,
+                "values": values,
+            }
+
+            diagnostics[status.name] = diagnostic_item
+            raw.append(diagnostic_item)
+            overall_levels.append(final_level)
+
+            if sensor_type is None or hz is None:
+                continue
+
+            ptp = (
+                values.get("ptp")
+                or values.get("ptp_status")
+                or values.get("ptp_state")
+                or values.get("PTP")
+            )
+
+            show_ptp = sensor_type in ("lidar", "camera")
+
+            sensor_name = status.name.split("/")[-1]
+
+            if sensor_type:
+                prefix = sensor_type.capitalize() + " "
+                if sensor_name.startswith(prefix):
+                    sensor_name = sensor_name[len(prefix) :]
+
+            sensors.append(
+                {
+                    "name": sensor_name,
+                    "full_name": status.name,
+                    "sensor_type": sensor_type,
+                    "level": final_level,
+                    "level_text": final_level_text,
+                    "diag_level": diag_level,
+                    "diag_level_text": diagnostic_level_to_text(diag_level),
+                    "hz_level": hz_level,
+                    "hz_level_text": diagnostic_level_to_text(hz_level)
+                    if hz_level is not None
+                    else None,
+                    "emoji": {
+                        0: "🟢",
+                        1: "🟡",
+                        2: "🔴",
+                        3: "⚫",
+                    }.get(final_level, "❓"),
+                    "message": status.message,
+                    "hz": hz,
+                    "expected_hz": expected_hz,
+                    "ptp": ptp if show_ptp else None,
+                    "show_ptp": show_ptp,
+                    "values": values,
+                }
+            )
+
+        sensor_levels = [sensor["level"] for sensor in sensors]
+        overall_level = worst_level(*sensor_levels)
+        diagnostic_data["diagnostics"] = diagnostics
+        diagnostic_data["raw"] = raw
+        diagnostic_data["sensors"] = sorted(sensors, key=lambda item: item["full_name"])
+        diagnostic_data["overall_level"] = overall_level
+        diagnostic_data["overall_status"] = diagnostic_level_to_text(overall_level)
 
     def set_data_collection(self, enabled: bool):
         if not self.data_collection_client.wait_for_service(timeout_sec=0.5):
             return {
                 "success": False,
-                "message": "Data collection service is not available"
+                "message": "Data collection service is not available",
             }
 
         request = SetBool.Request()
@@ -81,7 +246,7 @@ class WebUINode(Node):
             if time.time() > timeout_time:
                 return {
                     "success": False,
-                    "message": "Data collection service timed out"
+                    "message": "Data collection service timed out",
                 }
             time.sleep(0.01)
 
@@ -90,12 +255,12 @@ class WebUINode(Node):
         if result is None:
             return {
                 "success": False,
-                "message": "Data collection service did not respond"
+                "message": "Data collection service did not respond",
             }
 
         return {
             "success": result.success,
-            "message": result.message
+            "message": result.message,
         }
 
 
@@ -105,7 +270,7 @@ ros_node = WebUINode()
 ros_thread = threading.Thread(
     target=rclpy.spin,
     args=(ros_node,),
-    daemon=True
+    daemon=True,
 )
 ros_thread.start()
 
@@ -115,7 +280,7 @@ async def home(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={}
+        context={},
     )
 
 

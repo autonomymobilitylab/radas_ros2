@@ -20,5 +20,9 @@ button {
 }
 
 .status-table {
-    width: 300px;
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto;
+    border-collapse: collapse;
+    table-layout: auto;
 }
