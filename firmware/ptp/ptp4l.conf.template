@@ -1,0 +1,25 @@
+[global]
+domainNumber                0
+network_transport           UDPv4
+delay_mechanism             E2E
+
+serverOnly                  1
+priority1                   128
+priority2                   128
+
+clockClass                  248
+clockAccuracy               0xFE
+offsetScaledLogVariance     0xFFFF
+
+logAnnounceInterval         1
+logSyncInterval             0
+logMinDelayReqInterval      0
+
+time_stamping               software
+tx_timestamp_timeout        10
+
+verbose                     1
+summary_interval            6
+
+# Interface Definition, Make sure to define this inside your .env.
+[${PTP_INTERFACE}]
