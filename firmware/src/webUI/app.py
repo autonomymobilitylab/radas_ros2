@@ -26,6 +26,11 @@ EXPECTED_HZ = {
     "gnss": 10.0,
 }
 
+RED = 1 << 0  # D0
+GREEN = 1 << 1  # D1
+BLUE = 1 << 2  # D2
+YELLOW = RED | GREEN
+
 
 def classify_sensor_type(name: str) -> str | None:
     n = name.lower()
@@ -111,8 +116,8 @@ def normalize_level(level):
 # URL format: ftdi://vendor:product/interface
 # 0x0403:0x6014 is FT232H; interface 1 is ADBUS (GPIO AD0..AD7)
 gpio = GpioAsyncController()
-gpio.configure("ftdi://0x0403:0x6014/1", direction=0x01)  # AD0 output
-gpio.write(0x00)
+gpio.configure("ftdi://0x0403:0x6014/1", direction=0x07)  # D0..D2 as output
+gpio.write(0x000)
 
 
 class WebUINode(Node):
@@ -228,6 +233,15 @@ class WebUINode(Node):
         diagnostic_data["sensors"] = sorted(sensors, key=lambda item: item["full_name"])
         diagnostic_data["overall_level"] = overall_level
         diagnostic_data["overall_status"] = diagnostic_level_to_text(overall_level)
+
+        if overall_level == 3:
+            gpio.write(BLUE)
+        elif overall_level == 2:
+            gpio.write(RED)
+        elif overall_level == 1:
+            gpio.write(YELLOW)
+        else:
+            gpio.write(GREEN)
 
     def set_data_collection(self, enabled: bool):
         if not self.data_collection_client.wait_for_service(timeout_sec=0.5):
