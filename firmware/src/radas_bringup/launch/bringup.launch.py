@@ -6,28 +6,6 @@ import os
 
 
 def generate_launch_description():
-    """diagnostic_config_file = os.path.join(
-        get_package_share_directory('radas'),
-        'config',
-        'diagnostic_aggregator.yaml'
-    )"""
-
-    # ws_dir = "/ros2_ws"
-    # web_ui = ExecuteProcess(
-    #    cmd=[
-    #        os.path.join(ws_dir, ".venv", "bin", "python3"),
-    #        "-m",
-    #        "uvicorn",
-    #        "src.webUI.app:app",
-    #        "--host",
-    #        "0.0.0.0",
-    #        "--port",
-    #        "8080",
-    #    ],
-    #    cwd=ws_dir,
-    #    output="screen",
-    # )
-
     nodes = [
         Node(
             namespace="radas_xt",
@@ -61,15 +39,5 @@ def generate_launch_description():
                 }
             ],
         ),
-        # Node(
-        #    package="diagnostic_aggregator",
-        #    executable="aggregator_node",
-        #    name="analyzers",
-        #    output="screen",
-        #    parameters=[
-        #        os.path.join(ws_dir, "diagnostic_aggregator.yaml")
-        #    ],
-        # )
-        # web_ui,
     ]
     return LaunchDescription(nodes)
