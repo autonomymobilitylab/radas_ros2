@@ -69,7 +69,7 @@
                     <td>${sensor.name}</td>
                     <td>${levelLabel(sensor.level)}</td>
                     <td class="hz-column">${sensor.hz ?? "--"} / ${sensor.expected_hz ?? "--"} Hz</td>
-                    <td>${sensor.show_ptp ? (sensor.ptp ?? "--") : "N/A"}</td>
+                    <td>${sensor.packet_loss ?? "--"}</td>
                 `;
 
                 tbody.appendChild(row);
@@ -85,7 +85,7 @@
                 <th>Sensor</th>
                 <th>Level</th>
                 <th>Hz</th>
-                <th>PTP</th>
+                <th>Packet Loss</th>
             </tr>
         </thead>
         <tbody id="sensor-summary-body"></tbody>

@@ -50,6 +50,14 @@ def generate_launch_description():
         ],
         cwd="/ros2_ws",
     )
+    lidar_status = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/.venv/bin/python3",
+            "/ros2_ws/src/webUI/lidar_diagnostics.py"
+        ],
+        cwd="/ros2_ws",
+        output="screen",
+    )
 
     nodes = [
         Node(

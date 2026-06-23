@@ -20,7 +20,7 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 EXPECTED_HZ = {
-    "lidar": 10.0,
+    "lidar": 20.0,
     "camera": 10.0,
     "imu": 1000.0,
     "gnss": 10.0,
@@ -182,15 +182,7 @@ class WebUINode(Node):
             if sensor_type is None or hz is None:
                 continue
 
-            ptp = (
-                values.get("ptp")
-                or values.get("ptp_status")
-                or values.get("ptp_state")
-                or values.get("PTP")
-            )
-
-            show_ptp = sensor_type in ("lidar", "camera")
-
+            packet_loss = values.get("packet_loss") or values.get("packet_loss_count")
             sensor_name = status.name.split("/")[-1]
 
             if sensor_type:
@@ -220,8 +212,7 @@ class WebUINode(Node):
                     "message": status.message,
                     "hz": hz,
                     "expected_hz": expected_hz,
-                    "ptp": ptp if show_ptp else None,
-                    "show_ptp": show_ptp,
+                    "packet_loss": packet_loss,
                     "values": values,
                 }
             )

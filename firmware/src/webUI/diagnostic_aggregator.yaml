@@ -6,7 +6,7 @@ analyzers:
     lidar:
       type: diagnostic_aggregator/GenericAnalyzer
       path: Lidar
-      contains: ["Lidar"]
+      contains: ["radas_xt", "radas_jt", "xt32", "jt128", "lidar", "Lidar"]
 
     camera:
       type: diagnostic_aggregator/GenericAnalyzer
