@@ -99,6 +99,25 @@ def generate_launch_description():
                 },
             ],
         ),
+        Node(
+            package='diagnostic_aggregator',
+            executable='aggregator_node',
+            name='diagnostic_aggregator',
+            parameters=[{
+                "config_path": os.path.join(
+                    get_package_share_directory("radas_bringup"),
+                    "config",
+                    "diagnostics.yaml"
+                )
+            }],
+            output='screen'
+         ),
+        Node(
+            namespace="radas_webUI",
+            package="webUI",
+            executable="webUI_node",
+            output="screen",
+        ),
         hemi_data_collection,
         dome_data_collection,
         left_data_collection,
