@@ -53,3 +53,8 @@ CATKIN_IGNORE
 .obsidian/
 # env
 firmware/.env
+firmware/.venv
+firmware/log
+firmware/src/log
+/log
+firmware/install

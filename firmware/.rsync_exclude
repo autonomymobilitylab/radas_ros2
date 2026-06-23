@@ -1,2 +1,5 @@
 .env
 /src/__pycache__/
+.venv
+log/
+src/log/

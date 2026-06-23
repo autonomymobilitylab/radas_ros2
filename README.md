@@ -72,6 +72,19 @@ Contains a lot of information on many tools used during development. Does not re
  xhost +local:docker
  ```
 
+ ### **Starting main ros package**
+ 1. Follow Docker startup instructions.
+
+ 2. Inside the container run:
+ ```shell
+ colcon build --packages-select radas_bringup --symlink-install
+ ```
+
+ 3. Launching radas ros:
+ ```shell
+ ros2 launch radas_bringup bringup.launch.py
+ ```
+
  ### **LIDARs** 
 
  **PandarView2:**
