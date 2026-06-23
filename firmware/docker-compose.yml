@@ -23,6 +23,7 @@ services:
     depends_on:
       - ptp-grandmaster
     volumes:
+      - /dev/bus/usb:/dev/bus/usb
       - ./src:/ros2_ws/src
       - ./config:/ros2_ws/config
       - ./output_data:/data
