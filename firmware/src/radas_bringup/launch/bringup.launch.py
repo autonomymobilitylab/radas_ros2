@@ -35,13 +35,15 @@ def generate_launch_description():
             executable="hesai_ros_driver_node",
             name="xt32",
             output="screen",
-            parameters=[{
-                "config_path": os.path.join(
-                    get_package_share_directory("radas_bringup"),
-                    "config",
-                    "xt32.yaml"
-                )
-            }],
+            parameters=[
+                {
+                    "config_path": os.path.join(
+                        get_package_share_directory("radas_bringup"),
+                        "config",
+                        "xt32.yaml",
+                    )
+                }
+            ],
         ),
         Node(
             namespace="radas_jt",
@@ -49,13 +51,15 @@ def generate_launch_description():
             executable="hesai_ros_driver_node",
             name="jt128",
             output="screen",
-            parameters=[{
-                "config_path": os.path.join(
-                    get_package_share_directory("radas_bringup"),
-                    "config",
-                    "jt128.yaml"
-                )
-            }],
+            parameters=[
+                {
+                    "config_path": os.path.join(
+                        get_package_share_directory("radas_bringup"),
+                        "config",
+                        "jt128.yaml",
+                    )
+                }
+            ],
         ),
         # Node(
         #    package="diagnostic_aggregator",
