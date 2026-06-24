@@ -197,3 +197,6 @@ This guide won't go over creating the workspace, cloning manufacturer drivers/SD
  For ease of development, local changes can be pushed to the NUC using `./firmware/sync_to_nuc.sh`. This allows changes made on the local system to be pushed to the NUC without going through GitHub.
  
  This script should only be used during development and for quick tests. **Working, finalized code should always be manually committed and pulled to the NUC.** Before pulling on the NUC, run `git restore .` to revert to the latest published version.
+
+ ### **Basler cameras**
+ Pylonviewer works like normal inside the container. For ros2 handling of the basler cameras one can use `ros2 launch pylon_ros2_camera_wrapper pylon_ros2_camera.launch.py camera_id:="Basler_{pos}" config_file:="/ros2_ws/config/basler_{pos}.yaml"` although this doesn't do much as a standalone node setup.
