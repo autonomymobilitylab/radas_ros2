@@ -199,3 +199,54 @@ This guide won't go over creating the workspace, cloning manufacturer drivers/SD
  For ease of development, local changes can be pushed to the NUC using `./firmware/sync_to_nuc.sh`. This allows changes made on the local system to be pushed to the NUC without going through GitHub.
  
  This script should only be used during development and for quick tests. **Working, finalized code should always be manually committed and pulled to the NUC.** Before pulling on the NUC, run `git restore .` to revert to the latest published version.
+
+ ### **Running RADAS automatically on startup with systemd**
+ The ROS 2 Docker stack can be started automatically on boot using the `systemd` service.
+ 
+ The `.env` file should include:
+ 
+ ```shell
+ PROJECT_DIR=/path/to/firmware/folder
+ SERVICE_USER=localUser
+ ```
+ 
+ Make the installer executable and install the service:
+ 
+ ```shell
+ chmod +x install_service.sh
+ ./install_service.sh
+ ```
+ 
+ Start the service manually:
+ 
+ ```shell
+ sudo systemctl start radas_ros2.service
+ ```
+ 
+ Follow logs:
+ 
+ ```shell
+ journalctl -u radas_ros2.service -f
+ ```
+ 
+ Restart the service after changes:
+ 
+ ```shell
+ sudo systemctl restart radas_ros2.service
+ ```
+ 
+ Disable autostart:
+ 
+ ```shell
+ sudo systemctl disable radas_ros2.service
+ ```
+ 
+ Remove the service completely:
+ 
+ ```shell
+ sudo systemctl stop radas_ros2.service
+ sudo systemctl disable radas_ros2.service
+ sudo rm /etc/systemd/system/radas_ros2.service
+ sudo systemctl daemon-reload
+ ```
+ 

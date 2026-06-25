@@ -1,0 +1,16 @@
+[Unit]
+Description=ROS 2 Docker Stack
+Requires=docker.service
+After=docker.service network-online.target
+
+[Service]
+Type=simple
+User=${SERVICE_USER}
+WorkingDirectory=${PROJECT_DIR}
+ExecStart=/usr/bin/docker compose up --build
+ExecStop=/usr/bin/docker compose down
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
