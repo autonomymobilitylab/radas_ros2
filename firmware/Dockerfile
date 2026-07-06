@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-nmea-msgs \
     ros-jazzy-rtcm-msgs \
     ros-jazzy-camera-info-manager \
+    ros-jazzy-cv-bridge \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Pylon SDK
