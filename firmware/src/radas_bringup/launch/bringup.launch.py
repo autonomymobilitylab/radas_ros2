@@ -1,11 +1,30 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
+from launch.actions import ExecuteProcess
 
 from ament_index_python.packages import get_package_share_directory
 import os
 
 
 def generate_launch_description():
+    hemi_data_collection = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/src/lidars/lidarnode.py",
+            "--lidar-name=xt",
+        ],
+        cwd="/ros2_ws",
+    )
+    
+    dome_data_collection = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/src/lidars/lidarnode.py",
+            "--lidar-name=jt",
+        ],
+        cwd="/ros2_ws",
+    )
+     
     nodes = [
         Node(
             namespace="radas_xt",
@@ -39,5 +58,7 @@ def generate_launch_description():
                 }
             ],
         ),
+        hemi_data_collection,
+        dome_data_collection
     ]
     return LaunchDescription(nodes)
