@@ -7,6 +7,24 @@ import os
 
 
 def generate_launch_description():
+    hemi_data_collection = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/src/lidars/lidarnode.py",
+            "--lidar-name=xt",
+        ],
+        cwd="/ros2_ws",
+    )
+
+    dome_data_collection = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/src/lidars/lidarnode.py",
+            "--lidar-name=jt",
+        ],
+        cwd="/ros2_ws",
+    )
+
     left_data_collection = ExecuteProcess(
         cmd=[
             "/ros2_ws/src/.venv/bin/python3",
@@ -81,6 +99,8 @@ def generate_launch_description():
                 },
             ],
         ),
+        hemi_data_collection,
+        dome_data_collection,
         left_data_collection,
         middle_data_collection,
         right_data_collection,
