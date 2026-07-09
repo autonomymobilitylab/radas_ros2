@@ -58,3 +58,4 @@ firmware/log
 firmware/src/log
 /log
 firmware/install
+firmware/output_data

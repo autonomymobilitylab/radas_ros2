@@ -25,13 +25,14 @@ services:
     volumes:
       - ./src:/ros2_ws/src
       - ./config:/ros2_ws/config
+      - ./output_data:/data
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ws_build:/ros2_ws/build
       - ws_install:/ros2_ws/install
       - ws_log:/ros2_ws/log
       - ${HOME}/.Xauthority:/root/.Xauthority
     environment:
-      - DISPLAY=$DISPLAY
+      - DISPLAY=${DISPLAY}
       - XAUTHORITY=/root/.Xauthority
     stdin_open: true
     tty: true
