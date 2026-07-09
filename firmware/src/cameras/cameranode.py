@@ -11,7 +11,7 @@ from std_msgs.msg import Bool
 
 class ImageSaver(Node):
     def __init__(self, save_directory: str, camera_name: str):
-        super().__init__("image_saver")
+        super().__init__(f"{camera_name}_image_saver")
         self.bridge = CvBridge()
 
         self.save_dir = save_directory
@@ -21,10 +21,10 @@ class ImageSaver(Node):
         self.topic_dir = os.path.join(self.save_dir, self.camera_name)
         os.makedirs(self.topic_dir, exist_ok=True)
 
-        self.collection_active = False
-        self.collection_state_sub = self.create_subscription(
-            Bool, "/data_collection_active", self.collection_state_callback, 10
-        )
+        #self.collection_active = False
+        #self.collection_state_sub = self.create_subscription(
+        #    Bool, "/data_collection_active", self.collection_state_callback, 10
+        #)
 
         self.subscription = self.create_subscription(
             Image,
@@ -34,20 +34,20 @@ class ImageSaver(Node):
         )
         self.count = 0
 
-    def collection_state_callback(self, msg: Bool):
-        self.collection_active = msg.data
-        if self.collection_active:
-            self.get_logger().info(f"Data collection activated for {self.camera_name}.")
-        else:
-            self.get_logger().info(
-                f"Data collection deactivated for {self.camera_name}."
-            )
+    #def collection_state_callback(self, msg: Bool):
+    #    self.collection_active = msg.data
+    #    if self.collection_active:
+    #        self.get_logger().info(f"Data collection activated for {self.camera_name}.")
+    #    else:
+    #        self.get_logger().info(
+    #            f"Data collection deactivated for {self.camera_name}."
+    #        )
 
     def image_callback(self, msg):
-        if not self.collection_active:
-            return
+        #if not self.collection_active:
+        #    return
 
-        cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
+        cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
         filename = f"image_{self.count:06d}.png"
         filepath = os.path.join(self.topic_dir, filename)
         suc = cv2.imwrite(filepath, cv_image)

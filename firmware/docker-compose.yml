@@ -37,6 +37,9 @@ services:
     stdin_open: true
     tty: true
     privileged: true
+    command: >
+      bash -lc "source /entrypoint.sh &&
+      ros2 launch radas_bringup bringup.launch.py"
 
 volumes:
   ws_build:
