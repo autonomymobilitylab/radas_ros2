@@ -25,6 +25,8 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-rtcm-msgs \
     ros-jazzy-camera-info-manager \
     ros-jazzy-cv-bridge \
+    ros-jazzy-multisensor-calibration \
+    ros-jazzy-camera-calibration \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Pylon SDK
