@@ -44,8 +44,6 @@ Contains a lot of information on many tools used during development. Does not re
 
  3. Reboot the system and relaunch pylonviewer to save the configuration settings. You're now able to see your attached cameras
 
- 4. If this does not work, try using "Add remote GigE camera" and entering the camera's IP-address. Although, this speaks of a different underlying issue. 
-
 ### **Docker**
 
  1. Switch to firmware subfolder:
@@ -200,6 +198,9 @@ This guide won't go over creating the workspace, cloning manufacturer drivers/SD
  
  This script should only be used during development and for quick tests. **Working, finalized code should always be manually committed and pulled to the NUC.** Before pulling on the NUC, run `git restore .` to revert to the latest published version.
 
+ ### **Basler cameras**
+ Pylonviewer works like normal inside the container. For ros2 handling of the basler cameras one can use `ros2 launch pylon_ros2_camera_wrapper pylon_ros2_camera.launch.py camera_id:="Basler_{pos}" config_file:="/ros2_ws/config/basler_{pos}.yaml"` although this doesn't do much as a standalone node setup.
+ 
  ### **Running RADAS automatically on startup with systemd**
  The ROS 2 Docker stack can be started automatically on boot using the `systemd` service.
  
