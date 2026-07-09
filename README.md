@@ -200,3 +200,54 @@ This guide won't go over creating the workspace, cloning manufacturer drivers/SD
 
  ### **Basler cameras**
  Pylonviewer works like normal inside the container. For ros2 handling of the basler cameras one can use `ros2 launch pylon_ros2_camera_wrapper pylon_ros2_camera.launch.py camera_id:="Basler_{pos}" config_file:="/ros2_ws/config/basler_{pos}.yaml"` although this doesn't do much as a standalone node setup.
+ 
+ ### **Running RADAS automatically on startup with systemd**
+ The ROS 2 Docker stack can be started automatically on boot using the `systemd` service.
+ 
+ The `.env` file should include:
+ 
+ ```shell
+ PROJECT_DIR=/path/to/firmware/folder
+ SERVICE_USER=localUser
+ ```
+ 
+ Make the installer executable and install the service:
+ 
+ ```shell
+ chmod +x install_service.sh
+ ./install_service.sh
+ ```
+ 
+ Start the service manually:
+ 
+ ```shell
+ sudo systemctl start radas_ros2.service
+ ```
+ 
+ Follow logs:
+ 
+ ```shell
+ journalctl -u radas_ros2.service -f
+ ```
+ 
+ Restart the service after changes:
+ 
+ ```shell
+ sudo systemctl restart radas_ros2.service
+ ```
+ 
+ Disable autostart:
+ 
+ ```shell
+ sudo systemctl disable radas_ros2.service
+ ```
+ 
+ Remove the service completely:
+ 
+ ```shell
+ sudo systemctl stop radas_ros2.service
+ sudo systemctl disable radas_ros2.service
+ sudo rm /etc/systemd/system/radas_ros2.service
+ sudo systemctl daemon-reload
+ ```
+ 
