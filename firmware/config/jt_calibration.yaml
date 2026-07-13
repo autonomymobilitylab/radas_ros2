@@ -1,0 +1,14 @@
+jt_pointcloud_corrector:
+  ros__parameters:
+    translation:
+      x: 0.0
+      y: -0.140
+      z: -0.30
+
+    rotation:
+      x: 0.8872655
+      y: -0.0635663
+      z: -0.2648281
+      w: -0.3722704
+
+    output_frame: lidar_jt_corrected

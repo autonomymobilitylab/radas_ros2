@@ -131,6 +131,16 @@ def generate_launch_description():
                 }
             ],
         ),
+        Node(
+            package="jt_correction",
+            executable="jt_pointcloud_corrector",
+            name="jt_pointcloud_corrector",
+            output="screen",
+            parameters=["/ros2_ws/config/jt_calibration.yaml"],
+            remappings=[
+                ("input", "/lidar_points_jt"),
+            ],
+        ),
         hemi_data_collection,
         dome_data_collection,
         left_data_collection,
