@@ -42,8 +42,9 @@ RUN wget -q "https://downloads-bsl.baslerweb.com/software/pylon%2026.04/pylon-26
 WORKDIR /underlay_ws
 RUN mkdir -p src
 
-# Clone Pylon
-RUN git clone https://github.com/basler/pylon-ros-camera.git src/pylon-ros2-camera
+# Clone Hesai and Pylon
+RUN git clone --recursive https://github.com/HesaiTechnology/HesaiLidar_ROS_2.0.git src/hesai_ros_driver && \
+    git clone https://github.com/basler/pylon-ros-camera.git src/pylon-ros2-camera
 
 # Install dependencies using rosdep
 RUN apt-get update && \
