@@ -24,5 +24,5 @@ cutouts:                # Cutouts (id + parameters) stored as a single row matri
            1, -0.25, -0.20, 0.12,
            1, 0.25, 0.20, 0.12]   
 min_marker_detection: 2 # minimum number of markers that need to be detected in the camera image
-cad_model_mesh: "calibration_target_3holes_cad_mesh.ply" # relative file path to CAD model of the calibration target as mesh
-cad_model_cloud: "calibration_target_3holes_cad_cloud.ply" # relative file path to CAD model of the calibration target as cloud
+cad_model_mesh: "Radas_calibration_target_mesh.ply" # relative file path to CAD model of the calibration target as mesh
+cad_model_cloud: "Radas_calibration_target_cloud.ply" # relative file path to CAD model of the calibration target as cloud

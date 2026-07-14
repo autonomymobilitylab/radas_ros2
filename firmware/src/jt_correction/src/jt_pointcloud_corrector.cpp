@@ -29,9 +29,13 @@ public:
   {
     load_transform_parameters();
 
+    rclcpp::QoS pub_qos(rclcpp::KeepLast(10));
+    pub_qos.reliable();
+    pub_qos.durability_volatile();
+
     publisher_ = create_publisher<PointCloud2>(
-      kOutputTopic,
-      rclcpp::SensorDataQoS());
+        "/lidar_points_jt_corrected",
+        pub_qos);
 
     subscription_ = create_subscription<PointCloud2>(
       kInputTopic,

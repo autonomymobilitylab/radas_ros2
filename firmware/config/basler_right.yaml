@@ -14,7 +14,7 @@
     #  camera calibration parameters are stored. This URL string will be parsed
     #  from the ROS-CameraInfoManager:
     # camera_info_url: ""
-    camera_info_url: file:///ros2_ws/config/instrinsics/Right/ost.yaml
+    camera_info_url: file:///ros2_ws/config/instrinsics/right/ost.yaml
 
     #  The encoding of the pixels -- channel meaning, ordering, size
     #  taken from the list of strings in include/sensor_msgs/image_encodings.h

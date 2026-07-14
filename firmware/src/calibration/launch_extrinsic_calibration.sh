@@ -15,18 +15,18 @@ case $CALIB_TYPE in
             --qy 0.847816 \
             --qz -0.402347 \
             --qw 0.146393 \
-            --frame-id hesai_lidar_xt \
-            --child-frame-id hesai_lidar_jt &
+            --frame-id hesai_lidar_jt \
+            --child-frame-id hesai_lidar_xt &
         sleep 2
 
         ros2 run multisensor_calibration extrinsic_lidar_lidar_calibration \
             --ros-args \
             -p robot_ws_path:="/calib_ws" \
             -p target_config_file:="/ros2_ws/config/TargetWithCirclesAndAruco.yaml" \
-            -p src_lidar_sensor_name:="xt32" \
-            -p src_lidar_cloud_topic:="/lidar_points_xt" \
-            -p ref_lidar_sensor_name:="jt128" \
-            -p ref_lidar_cloud_topic:="/lidar_points_jt" \
+            -p src_lidar_sensor_name:="jt128" \
+            -p src_lidar_cloud_topic:="/lidar_points_jt_corrected" \
+            -p ref_lidar_sensor_name:="xt32" \
+            -p ref_lidar_cloud_topic:="/lidar_points_xt" \
             -p use_initial_guess:=true
         ;;
     2)
@@ -43,8 +43,8 @@ case $CALIB_TYPE in
                     ros2 run tf2_ros static_transform_publisher \
                         0.310 0.040 0.400 \
                         0.0 0.0 0.610865 \
-                        hesai_xt \
-                        Basler_left &
+                        hesai_lidar_xt \
+                        camera_left &
                     break
                     ;;
                 middle)
@@ -55,8 +55,8 @@ case $CALIB_TYPE in
                     ros2 run tf2_ros static_transform_publisher \
                         0.0 0.040 0.400 \
                         0.0 0.0 0.0 \
-                        hesai_xt \
-                        Basler_middle &
+                        hesai_lidar_xt \
+                        camera_middle &
                     break
                     ;;
                 right)
@@ -67,8 +67,8 @@ case $CALIB_TYPE in
                     ros2 run tf2_ros static_transform_publisher \
                         -0.310 0.040 0.400 \
                         0.0 0.0 -0.610865 \
-                        hesai_xt \
-                        Basler_right &
+                        hesai_lidar_xt \
+                        camera_right &
                     break
                     ;;
                 *) 
@@ -77,16 +77,17 @@ case $CALIB_TYPE in
             esac
         done
 
-    ros2 run multisensor_calibration extrinsic_camera_lidar_calibration \
+        ros2 run multisensor_calibration extrinsic_camera_lidar_calibration \
         --ros-args \
         -p robot_ws_path:="/calib_ws" \
         -p target_config_file:="/ros2_ws/config/TargetWithCirclesAndAruco.yaml" \
         -p camera_sensor_name:="$CAMERA_ID" \
         -p camera_image_topic:="/$CAMERA_NAME/pylon_ros2_camera_node/image_raw" \
+        -p camera_info_topic:="/$CAMERA_NAME/pylon_ros2_camera_node/camera_info" \
         -p lidar_sensor_name:="xt32" \
         -p lidar_cloud_topic:="/lidar_points_xt" \
         -p use_initial_guess:=true
-    ;;
+        ;;
 
   *)
     echo "Invalid selection; please run again and enter 1 or 2." >&2
