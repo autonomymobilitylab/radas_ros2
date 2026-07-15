@@ -12,7 +12,7 @@ case $CALIB_TYPE in
             -p robot_ws_path:="/calib_ws" \
             -p target_config_file:="/ros2_ws/config/TargetWithCirclesAndAruco.yaml" \
             -p src_lidar_sensor_name:="jt128" \
-            -p src_lidar_cloud_topic:="/lidar_points_jt_corrected" \
+            -p src_lidar_cloud_topic:="/lidar_points_jt" \
             -p ref_lidar_sensor_name:="xt32" \
             -p ref_lidar_cloud_topic:="/lidar_points_xt" \
             -p use_initial_guess:=true &
