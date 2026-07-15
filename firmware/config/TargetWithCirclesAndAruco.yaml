@@ -17,12 +17,11 @@ marker_positions:       # x,y marker positions (top-left) on board relative to c
            -0.65, -0.25]
 cutouts:                # Cutouts (id + parameters) stored as a single row matrix. x: rightwards, y: upwards
     rows: 1
-    cols: 16
+    cols: 12
     dt: f
-    data: [1, -0.25, 0.20, 0.12,    # Circular cutout: (id: 1, parameters: {X,Y,Radius})
-           1, 0.25, -0.20, 0.12,    
+    data: [1, 0.25, -0.20, 0.12,    
            1, -0.25, -0.20, 0.12,
-           1, 0.25, 0.20, 0.12]   
+           1, 0.25, 0.20, 0.12]   # Circular cutout: (id: 1, parameters: {X,Y,Radius})
 min_marker_detection: 2 # minimum number of markers that need to be detected in the camera image
-cad_model_mesh: "Radas_calibration_target_mesh.ply" # relative file path to CAD model of the calibration target as mesh
-cad_model_cloud: "Radas_calibration_target_cloud.ply" # relative file path to CAD model of the calibration target as cloud
+cad_model_mesh: "Radas_calibration_target_mesh_3hole.ply" # relative file path to CAD model of the calibration target as mesh
+cad_model_cloud: "Radas_calibration_target_cloud_3hole.ply" # relative file path to CAD model of the calibration target as cloud

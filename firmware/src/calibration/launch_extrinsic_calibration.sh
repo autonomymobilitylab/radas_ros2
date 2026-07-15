@@ -6,18 +6,6 @@ ros2 run multisensor_calibration initialize_robot_workspace --ros-args -p robot_
 
 case $CALIB_TYPE in
     1)
-        # Hesai XT -> Hesai JT
-        ros2 run tf2_ros static_transform_publisher \
-            --x 0.0 \
-            --y 0.0 \
-            --z 0.0 \
-            --qx 0.312979 \
-            --qy 0.847816 \
-            --qz -0.402347 \
-            --qw 0.146393 \
-            --frame-id hesai_lidar_jt \
-            --child-frame-id hesai_lidar_xt &
-        sleep 2
 
         ros2 run multisensor_calibration extrinsic_lidar_lidar_calibration \
             --ros-args \
@@ -27,7 +15,21 @@ case $CALIB_TYPE in
             -p src_lidar_cloud_topic:="/lidar_points_jt_corrected" \
             -p ref_lidar_sensor_name:="xt32" \
             -p ref_lidar_cloud_topic:="/lidar_points_xt" \
-            -p use_initial_guess:=true
+            -p use_initial_guess:=true &
+
+            CALIB_PID=$!
+
+            echo "Waiting for calibration result..."
+            ros2 topic echo --once \
+                /extrinsic_lidar_lidar_calibration/calibration_result \
+                multisensor_calibration_interface/msg/CalibrationResult \
+                --filter "m.is_successful" \
+                > /ros2_ws/config/last_calibration.yaml
+
+            echo "Saved calibration result to:"
+            echo "  /ros2_ws/config/last_calibration.yaml"
+
+            wait "$CALIB_PID"
         ;;
     2)
         CAMERA_NAME=""
