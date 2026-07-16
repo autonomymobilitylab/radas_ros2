@@ -6,7 +6,7 @@ marker_ids:             # ids of marker used as a single column matrix
     rows: 4
     cols: 1
     dt: i
-    data: [1, 2, 3, 4]  # marker order goes clockwise, starting from top left of board
+    data: [23, 24, 25, 26]  # marker order goes clockwise, starting from top left of board
 marker_positions:       # x,y marker positions (top-left) on board relative to center, stored row-by-row in meters. x: rightwards, y: upwards
     rows: 4
     cols: 2
