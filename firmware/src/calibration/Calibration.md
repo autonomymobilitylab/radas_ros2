@@ -23,10 +23,18 @@ After selecting 1, the extrinsic calibration toolbox will launch a GUI with 4 wi
 
 Once the toolbox has booted and you can see live feed from both LIDARS, place the calibration target in view of both LIDARS so that it's highlighted. 
 From here, press **Capture Target Observation**. After this, the target will be highlighted in yellow with different colors of dots marking the corners of the AruCo-targets. Ensure that this highlighting is identical between the two lidars. If not, press **Remove Last Observation**.
+#### 2) LIDAR-to-Camera:
+After selecting 2, the shell script will promp the user to choose camera position to calibrate:
+```shell
+Choose camera to calibrate ['left', 'middle', 'right']: 
+```
+Enter your preferred camera and press enter. After this the toolbox will launch the calibration GUI. Different from LIDAR-to-LIDAR calibration is that the calibration target placement guidance on the upper right corner of the screen actually works. Follow its instructions on target placement. 
 
-Continue this process for atleast 5 different observations, holding the target in a different orientation, different position of the LIDAR's FOV. If the toolbox gets stuck after capturing target observation, try moving around to a new location with the target. If this doesn't resolve after a while, kill the process and start again. 
+Once the target is in place, press **Capture Target Observation**. If the corners between the LIDAR and camera view don't match, press **Remove Last Observation** and repeat the process.
 
-After enough suitable target observations, press **Calibrate**. This will print out the calibration results to the console, but this is also saved to the location ```firmware/config/last_observation.yaml```. 
+Continue this process for atleast 5 different observations, holding the target in a different orientation, different position of the LIDAR's/Camera's FOV. If the toolbox gets stuck after capturing target observation, try moving around to a new location with the target. If this doesn't resolve after a while, kill the process and start again. 
+
+After enough suitable target observations, press **Calibrate**. This will print out the calibration results to the console, but this is also saved to the location ```firmware/config/last_observation.yaml``` (for LIDARs) or ```firmware/config/extrinsics/[camera_pos]``` (for cameras). 
 
 **Inspecting calibration results**
 
