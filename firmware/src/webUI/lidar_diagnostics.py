@@ -1,4 +1,5 @@
 import time
+from collections import deque
 
 import rclpy
 from rclpy.node import Node
@@ -17,8 +18,8 @@ class LidarDiagnostics(Node):
         }
 
         self.msg_times = {
-            "Lidar/Lidar 1": [],
-            "Lidar/Lidar 2": [],
+            "Lidar/Lidar 1": deque(),
+            "Lidar/Lidar 2": deque(),
         }
 
         self.packet_loss = {
@@ -63,10 +64,28 @@ class LidarDiagnostics(Node):
         self.create_timer(1.0, self.publish_diagnostics)
 
     def point_cb(self, name):
-        now = time.time()
+        now = time.monotonic()
+
         self.last_msg_time[name] = now
-        self.msg_times[name].append(now)
-        self.msg_times[name] = [t for t in self.msg_times[name] if now - t <= 2.0]
+
+        times = self.msg_times[name]
+        times.append(now)
+
+        cutoff = now - 2.0
+        while times and times[0] < cutoff:
+            times.popleft()
+
+    def calculate_hz(self, name):
+        times = self.msg_times[name]
+
+        if len(times) < 2:
+            return 0.0
+
+        elapsed = times[-1] - times[0]
+        if elapsed <= 0.0:
+            return 0.0
+
+        return (len(times) - 1) / elapsed
 
     def packet_loss_cb(self, name, msg):
         total = msg.total_packet_count
@@ -80,14 +99,13 @@ class LidarDiagnostics(Node):
             self.packet_loss[name] = lost / total
 
     def publish_diagnostics(self):
-        now = time.time()
+        now = time.monotonic()
         msg = DiagnosticArray()
         msg.header.stamp = self.get_clock().now().to_msg()
 
         for name in self.msg_times:
             last = self.last_msg_time[name]
-            times = self.msg_times[name]
-            hz = len(times) / 2.0
+            hz = self.calculate_hz(name) / 2
 
             if last is None or now - last > 2.0:
                 level = DiagnosticStatus.STALE
@@ -129,7 +147,10 @@ class LidarDiagnostics(Node):
 
             if packet_loss_total is not None:
                 values.append(
-                    KeyValue(key="packet_loss_count", value=str(packet_loss_total))
+                    KeyValue(
+                        key="packet_loss_count",
+                        value=str(packet_loss_total),
+                    )
                 )
 
             status.values = values
@@ -143,6 +164,8 @@ def main():
     rclpy.init()
     node = LidarDiagnostics()
     rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
 
 
 if __name__ == "__main__":

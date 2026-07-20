@@ -20,7 +20,7 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 EXPECTED_HZ = {
-    "lidar": 20.0,
+    "lidar": 10.0,
     "camera": 10.0,
     "imu": 1000.0,
     "gnss": 10.0,
