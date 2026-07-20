@@ -26,3 +26,25 @@ button {
     border-collapse: collapse;
     table-layout: auto;
 }
+.status-table th,
+.status-table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    white-space: nowrap;
+}
+
+.gps-table {
+    max-width: 1400px;
+    margin-bottom: 30px;
+}
+
+.gps-table small {
+    white-space: normal;
+}
+
+@media (max-width: 900px) {
+    .status-table {
+        display: block;
+        overflow-x: auto;
+    }
+}

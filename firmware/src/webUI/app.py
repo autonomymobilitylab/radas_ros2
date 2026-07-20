@@ -73,6 +73,14 @@ def worst_level(*levels):
     return max(valid) if valid else 3
 
 
+def update_overall_status():
+    sensor_levels = [sensor["level"] for sensor in diagnostic_data["sensors"]]
+    gps_level = diagnostic_data["gps"]["level"]
+    overall_level = worst_level(*sensor_levels, gps_level)
+    diagnostic_data["overall_level"] = overall_level
+    diagnostic_data["overall_status"] = diagnostic_level_to_text(overall_level)
+
+
 def diagnostic_level_to_text(level) -> str:
     level = normalize_level(level)
 
@@ -97,6 +105,25 @@ diagnostic_data = {
     "start_time": None,
     "collection_enabled": "false",
     "recording_message": "Data collection has not been started yet.",
+    "gps": {
+        "level": 3,
+        "level_text": "WAITING",
+        "emoji": "⚫",
+        "message": "Waiting for satellite lock",
+        "last_update": None,
+        "satellites_used": None,
+        "satellites_visible": None,
+        "fix_status": None,
+        "latitude": None,
+        "longitude": None,
+        "altitude": None,
+        "speed": None,
+        "hdop": None,
+        "pdop": None,
+        "interference": None,
+        "spoofing": None,
+        "rf_bands": None,
+    },
 }
 
 
@@ -175,6 +202,34 @@ class WebUINode(Node):
                 "values": values,
             }
 
+            # Populate the dedicated GPS panel from the aggregated diagnostic.
+            # Matching by its GNSS values avoids selecting the aggregator's group summary.
+            if "satellites_used" in values or "gpsfix_available" in values:
+                gps = diagnostic_data["gps"]
+                gps.update(
+                    {
+                        "level": final_level,
+                        "level_text": final_level_text,
+                        "emoji": {0: "🟢", 1: "🟡", 2: "🔴", 3: "⚫"}.get(
+                            final_level, "❓"
+                        ),
+                        "message": status.message,
+                        "last_update": diagnostic_data["last_update"],
+                        "satellites_used": parse_float(values.get("satellites_used")),
+                        "satellites_visible": parse_float(values.get("satellites_visible")),
+                        "fix_status": parse_float(values.get("fix_status")),
+                        "latitude": parse_float(values.get("latitude")),
+                        "longitude": parse_float(values.get("longitude")),
+                        "altitude": parse_float(values.get("altitude")),
+                        "speed": parse_float(values.get("speed")),
+                        "hdop": parse_float(values.get("hdop")),
+                        "pdop": parse_float(values.get("pdop")),
+                        "interference": parse_float(values.get("interference")),
+                        "spoofing": parse_float(values.get("spoofing")),
+                        "rf_bands": parse_float(values.get("rf_bands")),
+                    }
+                )
+
             diagnostics[status.name] = diagnostic_item
             raw.append(diagnostic_item)
             overall_levels.append(final_level)
@@ -217,19 +272,16 @@ class WebUINode(Node):
                 }
             )
 
-        sensor_levels = [sensor["level"] for sensor in sensors]
-        overall_level = worst_level(*sensor_levels)
         diagnostic_data["diagnostics"] = diagnostics
         diagnostic_data["raw"] = raw
         diagnostic_data["sensors"] = sorted(sensors, key=lambda item: item["full_name"])
-        diagnostic_data["overall_level"] = overall_level
-        diagnostic_data["overall_status"] = diagnostic_level_to_text(overall_level)
+        update_overall_status()
 
-        if overall_level == 3:
+        if final_level == 3:
             gpio.write(BLUE)
-        elif overall_level == 2:
+        elif final_level == 2:
             gpio.write(RED)
-        elif overall_level == 1:
+        elif final_level == 1:
             gpio.write(YELLOW)
         else:
             gpio.write(GREEN)

@@ -57,6 +57,27 @@
             return "Unknown";
         }
 
+        function valueOrDash(value, digits = null) {
+            if (value === null || value === undefined || Number.isNaN(value)) return "--";
+            return digits === null ? value : Number(value).toFixed(digits);
+        }
+
+        function renderGpsStatus(gps) {
+            document.getElementById("gps-status").innerText = gps.emoji || "⚫";
+            document.getElementById("gps-level").innerText = gps.level_text || "WAITING";
+            document.getElementById("gps-message").innerText = gps.message || "Waiting for satellite lock";
+            document.getElementById("gps-satellites").innerText =
+                `${valueOrDash(gps.satellites_used)} / ${valueOrDash(gps.satellites_visible)}`;
+            document.getElementById("gps-position").innerText =
+                gps.latitude == null ? "--" : `${valueOrDash(gps.latitude, 7)}, ${valueOrDash(gps.longitude, 7)}`;
+            document.getElementById("gps-altitude").innerText =
+                gps.altitude == null ? "--" : `${valueOrDash(gps.altitude, 2)} m`;
+            document.getElementById("gps-dop").innerText =
+                `HDOP ${valueOrDash(gps.hdop, 2)} / PDOP ${valueOrDash(gps.pdop, 2)}`;
+            document.getElementById("gps-security").innerText =
+                `Interference ${valueOrDash(gps.interference)} / Spoofing ${valueOrDash(gps.spoofing)}`;
+        }
+
         function renderSensorSummary(sensors) {
             const tbody = document.getElementById("sensor-summary-body");
             tbody.innerHTML = "";
@@ -91,6 +112,32 @@
         <tbody id="sensor-summary-body"></tbody>
     </table>
 
+    <h2>GPS Status</h2>
+    <table class="status-table gps-table">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Level</th>
+                <th>Satellites Used / Visible</th>
+                <th>Position</th>
+                <th>Altitude</th>
+                <th>DOP</th>
+                <th>RF Security</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="gps-status">⚫</td>
+                <td><span id="gps-level">WAITING</span><br><small id="gps-message">Waiting for satellite lock</small></td>
+                <td id="gps-satellites">-- / --</td>
+                <td id="gps-position">--</td>
+                <td id="gps-altitude">--</td>
+                <td id="gps-dop">HDOP -- / PDOP --</td>
+                <td id="gps-security">Interference -- / Spoofing --</td>
+            </tr>
+        </tbody>
+    </table>
+
     <script>
 
         async function updateDiagnostics() {
@@ -98,6 +145,7 @@
             const data = await response.json();
 
             renderSensorSummary(data.sensors || []);
+            renderGpsStatus(data.gps || {});
 
             const statusEl = document.getElementById('status');
 
