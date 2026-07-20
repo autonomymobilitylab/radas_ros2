@@ -1,5 +1,4 @@
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess
 from launch_ros.actions import Node
 from launch.actions import ExecuteProcess
 
@@ -50,11 +49,32 @@ def generate_launch_description():
         ],
         cwd="/ros2_ws",
     )
+    """diagnostic_config_file = os.path.join(
+       get_package_share_directory('radas'),
+       'config',
+       'diagnostic_aggregator.yaml'
+    )"""
+
+    ws_dir = "/ros2_ws"
+    web_ui = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/.venv/bin/python3",
+            "-m",
+            "uvicorn",
+            "src.webUI.app:app",
+            "--host",
+            "0.0.0.0",
+            "--port",
+            "8080",
+            ],
+        cwd="/ros2_ws",
+        output="screen",
+        )
     lidar_status = ExecuteProcess(
         cmd=[
             "/ros2_ws/.venv/bin/python3",
             "/ros2_ws/src/webUI/lidar_diagnostics.py"
-        ],
+            ],
         cwd="/ros2_ws",
         output="screen",
     )
@@ -109,24 +129,16 @@ def generate_launch_description():
             ],
         ),
         Node(
-            package='diagnostic_aggregator',
-            executable='aggregator_node',
-            name='diagnostic_aggregator',
-            parameters=[{
-                "config_path": os.path.join(
-                    get_package_share_directory("radas_bringup"),
-                    "config",
-                    "diagnostics.yaml"
-                )
-            }],
-            output='screen'
-         ),
-        Node(
-            namespace="radas_webUI",
-            package="webUI",
-            executable="webUI_node",
+            package="diagnostic_aggregator",
+            executable="aggregator_node",
+            name="analyzers",
             output="screen",
+            parameters=[
+                os.path.join(ws_dir, "src", "webUI", "diagnostic_aggregator.yaml")
+            ],
         ),
+        web_ui,
+        lidar_status,
         hemi_data_collection,
         dome_data_collection,
         left_data_collection,
