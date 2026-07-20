@@ -11,7 +11,7 @@ analyzers:
     camera:
       type: diagnostic_aggregator/GenericAnalyzer
       path: Camera
-      contains: ["Camera"]
+      contains: ["Camera/"]
 
     imu:
       type: diagnostic_aggregator/GenericAnalyzer

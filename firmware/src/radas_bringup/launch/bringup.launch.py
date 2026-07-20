@@ -86,6 +86,14 @@ def generate_launch_description():
         cwd="/ros2_ws",
         output="screen",
     )
+    camera_status = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/.venv/bin/python3",
+            "/ros2_ws/src/webUI/camera_diagnostics.py"
+            ],
+        cwd="/ros2_ws",
+        output="screen",
+    )
 
     nodes = [
         #Node(
@@ -148,6 +156,7 @@ def generate_launch_description():
         web_ui,
         lidar_status,
         gps_status,
+        camera_status,
         #hemi_data_collection,
         #dome_data_collection,
         #left_data_collection,

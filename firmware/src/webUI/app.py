@@ -234,11 +234,26 @@ class WebUINode(Node):
             raw.append(diagnostic_item)
             overall_levels.append(final_level)
 
-            if sensor_type is None or hz is None:
+            # Only leaf sensor diagnostics belong in the table. Camera diagnostics
+            # do not expose a frame-rate value, so do not require hz for cameras.
+            # The aggregator may rewrite Camera/Basler_right into different path
+            # shapes depending on its version. Identify normalized camera leaves by
+            # their camera-specific values instead of relying on an exact path.
+            hardware_id = status.hardware_id.strip()
+            valid_hardware_id = bool(hardware_id) and hardware_id.lower() != "none"
+
+            is_camera_leaf = (
+                sensor_type == "camera"
+                and valid_hardware_id
+                and ("availability" in values or "calibration" in values)
+            )
+            is_rate_sensor_leaf = sensor_type is not None and hz is not None
+
+            if not (is_camera_leaf or is_rate_sensor_leaf):
                 continue
 
             packet_loss = values.get("packet_loss") or values.get("packet_loss_count")
-            sensor_name = status.name.split("/")[-1]
+            sensor_name = hardware_id or status.name.split("/")[-1]
 
             if sensor_type:
                 prefix = sensor_type.capitalize() + " "
@@ -268,6 +283,7 @@ class WebUINode(Node):
                     "hz": hz,
                     "expected_hz": expected_hz,
                     "packet_loss": packet_loss,
+                    "details": values.get("calibration") or status.message,
                     "values": values,
                 }
             )
@@ -277,11 +293,12 @@ class WebUINode(Node):
         diagnostic_data["sensors"] = sorted(sensors, key=lambda item: item["full_name"])
         update_overall_status()
 
-        if final_level == 3:
+        overall_level = diagnostic_data["overall_level"]
+        if overall_level == 3:
             gpio.write(BLUE)
-        elif final_level == 2:
+        elif overall_level == 2:
             gpio.write(RED)
-        elif final_level == 1:
+        elif overall_level == 1:
             gpio.write(YELLOW)
         else:
             gpio.write(GREEN)

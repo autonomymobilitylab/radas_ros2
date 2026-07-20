@@ -84,13 +84,17 @@
 
             for (const sensor of sensors) {
                 const row = document.createElement("tr");
+                const hzText = sensor.hz == null
+                    ? "--"
+                    : `${sensor.hz} / ${sensor.expected_hz ?? "--"} Hz`;
 
                 row.innerHTML = `
                     <td>${sensor.emoji}</td>
                     <td>${sensor.name}</td>
                     <td>${levelLabel(sensor.level)}</td>
-                    <td class="hz-column">${sensor.hz ?? "--"} / ${sensor.expected_hz ?? "--"} Hz</td>
+                    <td class="hz-column">${hzText}</td>
                     <td>${sensor.packet_loss ?? "--"}</td>
+                    <td>${sensor.details ?? sensor.message ?? "--"}</td>
                 `;
 
                 tbody.appendChild(row);
@@ -107,6 +111,7 @@
                 <th>Level</th>
                 <th>Hz</th>
                 <th>Packet Loss</th>
+                <th>Details</th>
             </tr>
         </thead>
         <tbody id="sensor-summary-body"></tbody>
