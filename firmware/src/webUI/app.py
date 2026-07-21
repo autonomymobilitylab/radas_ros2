@@ -26,6 +26,14 @@ EXPECTED_HZ = {
     "gnss": 10.0,
 }
 
+SENSOR_DISPLAY_NAMES = {
+    "Basler_left": "Camera Left",
+    "Basler_middle": "Camera Middle",
+    "Basler_right": "Camera Right",
+    "Lidar 1": "Lidar XT",
+    "Lidar 2": "Lidar JT",
+}
+
 RED = 1 << 0  # D0
 GREEN = 1 << 1  # D1
 BLUE = 1 << 2  # D2
@@ -45,6 +53,25 @@ def classify_sensor_type(name: str) -> str | None:
         return "gnss"
 
     return None
+
+
+def get_sensor_display_name(full_name: str, sensor_type=None) -> str:
+    # Keep only the final diagnostic path component.
+    name = full_name.rsplit("/", 1)[-1].strip()
+
+    if sensor_type == "camera":
+        while name.startswith("Camera "):
+            name = name.removeprefix("Camera ").strip()
+
+    elif sensor_type == "lidar":
+        # Collapse repeated prefixes but retain one "Lidar ".
+        while name.startswith("Lidar Lidar "):
+            name = name.removeprefix("Lidar ").strip()
+
+        if name in {"1", "2"}:
+            name = f"Lidar {name}"
+
+    return SENSOR_DISPLAY_NAMES.get(name, name)
 
 
 def parse_float(value):
@@ -174,7 +201,6 @@ class WebUINode(Node):
         diagnostics = {}
         raw = []
         sensors = []
-        overall_levels = []
 
         for status in msg.status:
             values = {kv.key: kv.value for kv in status.values}
@@ -232,33 +258,17 @@ class WebUINode(Node):
 
             diagnostics[status.name] = diagnostic_item
             raw.append(diagnostic_item)
-            overall_levels.append(final_level)
 
-            # Only leaf sensor diagnostics belong in the table. Camera diagnostics
-            # do not expose a frame-rate value, so do not require hz for cameras.
-            # The aggregator may rewrite Camera/Basler_right into different path
-            # shapes depending on its version. Identify normalized camera leaves by
-            # their camera-specific values instead of relying on an exact path.
-            hardware_id = status.hardware_id.strip()
-            valid_hardware_id = bool(hardware_id) and hardware_id.lower() != "none"
-
-            is_camera_leaf = (
-                sensor_type == "camera"
-                and valid_hardware_id
-                and ("availability" in values or "calibration" in values)
-            )
-            is_rate_sensor_leaf = sensor_type is not None and hz is not None
-
-            if not (is_camera_leaf or is_rate_sensor_leaf):
+            # Aggregator group entries do not contain an Hz value and should
+            # not be displayed as individual sensors.
+            if sensor_type is None or hz is None:
                 continue
 
             packet_loss = values.get("packet_loss") or values.get("packet_loss_count")
-            sensor_name = hardware_id or status.name.split("/")[-1]
-
-            if sensor_type:
-                prefix = sensor_type.capitalize() + " "
-                if sensor_name.startswith(prefix):
-                    sensor_name = sensor_name[len(prefix) :]
+            sensor_name = get_sensor_display_name(
+                status.name,
+                sensor_type,
+            )
 
             sensors.append(
                 {
@@ -283,7 +293,6 @@ class WebUINode(Node):
                     "hz": hz,
                     "expected_hz": expected_hz,
                     "packet_loss": packet_loss,
-                    "details": values.get("calibration") or status.message,
                     "values": values,
                 }
             )
