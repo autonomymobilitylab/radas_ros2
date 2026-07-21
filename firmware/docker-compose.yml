@@ -33,15 +33,15 @@ services:
       - ws_log:/ros2_ws/log
       - ${HOME}/.Xauthority:/root/.Xauthority
       - ./config/gnss/:/opt/ros/jazzy/share/septentrio_gnss_driver/config/
+      - ./.env:/ros2_ws/src/.env
     environment:
       - DISPLAY=${DISPLAY}
       - XAUTHORITY=/root/.Xauthority
     stdin_open: true
     tty: true
     privileged: true
-    command: >
-      bash -lc "source /entrypoint.sh &&
-      ros2 launch radas_bringup bringup.launch.py"
+    group_add:
+      - dialout
 
 volumes:
   ws_build:

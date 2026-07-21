@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
     libboost-all-dev \
     libgeographiclib-dev \
     libcap-dev \
+    rtklib \
     ros-jazzy-diagnostic-updater \
     ros-jazzy-pcl-ros \
     ros-jazzy-nmea-msgs \
