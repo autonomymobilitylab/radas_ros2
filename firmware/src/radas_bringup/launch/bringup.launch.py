@@ -99,6 +99,18 @@ def generate_launch_description():
                 },
             ],
         ),
+        Node(
+            package="septentrio_gnss_driver",
+            executable="septentrio_gnss_driver_node",
+            name="gnss_rover",
+            namespace="Gnss",
+            output="screen",
+            emulate_tty=True,
+            sigterm_timeout="20",
+            parameters=[
+                "/opt/ros/jazzy/share/septentrio_gnss_driver/config/custom_rover.yaml"
+            ],
+        ),
         hemi_data_collection,
         dome_data_collection,
         left_data_collection,
