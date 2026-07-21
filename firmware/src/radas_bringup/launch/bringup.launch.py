@@ -4,7 +4,9 @@ from launch.actions import ExecuteProcess
 
 from ament_index_python.packages import get_package_share_directory
 import os
+from dotenv import load_dotenv
 
+load_dotenv("/ros2_ws/src/.env")
 
 def generate_launch_description():
     hemi_data_collection = ExecuteProcess(
@@ -49,6 +51,31 @@ def generate_launch_description():
         ],
         cwd="/ros2_ws",
     )
+    ntrip_client = ExecuteProcess(
+        cmd=[
+            "str2str",
+            "-in",
+            (
+                f"ntrip://{os.getenv("NTRIPUSER")}:"
+                f"{os.getenv('NTRIPPASS')}"
+                "@opencaster.nls.fi:2101/VRS-FKP"
+            ),
+            "-out",
+            "serial://ttyACM0:115200:8:n:1:of",
+            "-p",
+            "60.188333",
+            "24.823917",
+            "4",
+            "-n",
+            "5000",
+            "-t",
+            "3",
+        ],
+        output="screen",
+        respawn=True,
+        respawn_delay=5.0,
+    )
+
 
     nodes = [
         Node(
@@ -111,10 +138,6 @@ def generate_launch_description():
                 "/opt/ros/jazzy/share/septentrio_gnss_driver/config/custom_rover.yaml"
             ],
         ),
-        hemi_data_collection,
-        dome_data_collection,
-        left_data_collection,
-        middle_data_collection,
-        right_data_collection,
+        ntrip_client,
     ]
     return LaunchDescription(nodes)

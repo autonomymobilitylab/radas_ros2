@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     python3-rosdep \
     python3-venv \
     python3-git \
+    python3-dotenv \
     git \
     wget \
     iproute2 \
