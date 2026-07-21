@@ -83,12 +83,12 @@ latency_compensation: false
 
 rtk_settings:
   ntrip_1:
-    id: "NTR1"
+    id: ""
     caster: "opencaster.nls.fi"
     caster_port: 2102
     username: ""
     password: ""
-    mountpoint: "DGNSS-MSM1"
+    mountpoint: "VRS-FKP"
     version: "v2"
     tls: false
     fingerprint: ""
@@ -125,7 +125,7 @@ rtk_settings:
     keep_open: true
 
   serial_1:
-    port: ""
+    port: "USB1"
     baud_rate: 115200
     rtk_standard: "auto"
     send_gga: "off"
