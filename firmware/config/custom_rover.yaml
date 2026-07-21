@@ -15,7 +15,7 @@ stream_device:
     port: 0
     unicast_ip: ""
 
-configure_rx: false
+configure_rx: true
 
 custom_commands_file: ""
 
@@ -26,7 +26,7 @@ login:
 osnma:
   mode: "off"
   ntp_server: ""
-  keep_open: true
+  keep_open: false
 
 frame_id: gnss
 
@@ -44,13 +44,15 @@ insert_local_frame: false
 
 local_frame_id: odom
 
-get_spatial_config_from_tf: true
+get_spatial_config_from_tf: false
 
-lock_utm_zone: true
+lock_utm_zone: false
 
 use_ros_axis_orientation: true
 
 receiver_type: gnss
+
+multi_antenna: true
 
 datum: Default
 
@@ -74,7 +76,7 @@ polling_period:
   pvt: 500
   rest: 500
 
-use_gnss_time: false
+use_gnss_time: true
 ntp_server: false
 ptp_server_clock: false
 latency_compensation: false
@@ -82,60 +84,66 @@ latency_compensation: false
 rtk_settings:
   ntrip_1:
     id: "NTR1"
-    caster: "1.2.3.4"
-    caster_port: 2101
-    username: "Asterix"
-    password: "password"
-    mountpoint: "mtpt1"
-    version: "v2"
-    tls: true
-    fingerprint: "AA:BB:56:78:90:12: ... 78:90:12:34"
-    rtk_standard: "RTCMv3"
-    send_gga: "auto"
-    keep_open: true
-  ntrip_2:
-    id: "NTR3"
-    caster: "5.6.7.8"
-    caster_port: 2101
-    username: "Obelix"
-    password: "password"
-    mountpoint: "mtpt2"
+    caster: "opencaster.nls.fi"
+    caster_port: 2102
+    username: ""
+    password: ""
+    mountpoint: "DGNSS-MSM1"
     version: "v2"
     tls: false
     fingerprint: ""
-    rtk_standard: "RTCMv2"
+    rtk_standard: "RTCMv3"
     send_gga: "auto"
     keep_open: true
-  ip_server_1:
-    id: "IPS3"
-    port: 28785
-    rtk_standard: "RTCMv2"
-    send_gga: "auto"
-    keep_open: true
-  ip_server_2:
-    id: "IPS5"
-    port: 28786
-    rtk_standard: "CMRv2"
-    send_gga: "auto"
-    keep_open: true
-  serial_1:
-    port: "COM1"
-    baud_rate: 230400
+
+  ntrip_2:
+    id: ""
+    caster: ""
+    caster_port: 2101
+    username: ""
+    password: ""
+    mountpoint: ""
+    version: "v2"
+    tls: false
+    fingerprint: ""
     rtk_standard: "auto"
-    send_gga: "sec1"
+    send_gga: "auto"
     keep_open: true
-  serial_2:
-    port: "COM2"
-    baud_rate: 230400
+
+  ip_server_1:
+    id: ""
+    port: 0
+    rtk_standard: ""
+    send_gga: "auto"
+    keep_open: true
+
+  ip_server_2:
+    id: ""
+    port: 0
+    rtk_standard: ""
+    send_gga: "auto"
+    keep_open: true
+
+  serial_1:
+    port: ""
+    baud_rate: 115200
     rtk_standard: "auto"
     send_gga: "off"
     keep_open: true
+
+  serial_2:
+    port: ""
+    baud_rate: 115200
+    rtk_standard: "auto"
+    send_gga: "off"
+    keep_open: true
+
 
 publish:
   # For both GNSS and INS Rxs 
   auto_publish: false
   publish_only_valid: false
-  navsatfix: false
+  navsatfix: true
   gpsfix: true
   gpgga: false
   gprmc: false
@@ -143,8 +151,8 @@ publish:
   measepoch: false
   pvtcartesian: false
   pvtgeodetic: true
-  basevectorcart: false
-  basevectorgeod: false
+  basevectorcart: true
+  basevectorgeod: true
   poscovcartesian: false
   poscovgeodetic: true
   velcovcartesian: false
@@ -153,7 +161,7 @@ publish:
   attcoveuler: true
   pose: false
   twist: false
-  diagnostics: false
+  diagnostics: true
   aimplusstatus: true
   galauthstatus: false
   # For GNSS Rx only
@@ -173,48 +181,6 @@ publish:
   localization_ecef: false
   tf_ecef: false
 
-# INS-Specific Parameters
-
-ins_spatial_config:  
-  imu_orientation:
-    theta_x: 0.0
-    theta_y: 0.0
-    theta_z: 0.0
-  poi_lever_arm:
-    delta_x: 0.0
-    delta_y: 0.0
-    delta_z: 0.0
-  ant_lever_arm:
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  vsm_lever_arm:
-    vsm_x: 0.0
-    vsm_y: 0.0
-    vsm_z: 0.0
-
-ins_initial_heading: auto
-
-ins_std_dev_mask:
-  att_std_dev: 5.0
-  pos_std_dev: 10.0
-
-ins_use_poi: true
-
-ins_vsm:
-  source: "twist"
-  config: [true, false, false]
-  variances_by_parameter: true
-  variances: [0.1, 0.0, 0.0]
-  ip_server:
-    id: "IPS2"
-    port: 28787
-    keep_open: true
-  serial:
-    port: "COM3"
-    baud_rate: 115200
-    keep_open: true
-
 # Logger
 
-activate_debug_log: false
+activate_debug_log: true
