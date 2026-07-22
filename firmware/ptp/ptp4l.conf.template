@@ -1,21 +1,22 @@
 [global]
 domainNumber                0
+ptp_minor_version           0
 network_transport           UDPv4
 delay_mechanism             E2E
 
-serverOnly                  1
-priority1                   128
-priority2                   128
+serverOnly                  0
+priority1                   0
+priority2                   0
 
 clockClass                  248
 clockAccuracy               0xFE
 offsetScaledLogVariance     0xFFFF
 
 logAnnounceInterval         1
-logSyncInterval             0
+logSyncInterval             -1
 logMinDelayReqInterval      0
 
-time_stamping               software
+time_stamping               hardware
 tx_timestamp_timeout        10
 
 verbose                     1
