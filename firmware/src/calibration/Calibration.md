@@ -1,6 +1,39 @@
 # Calibration
 
-## Intrinsic Calibraton
+## Intrinsic Calibration
+
+This project uses Vincent Rabaud's [ROS camera calibration package](https://wiki.ros.org/camera_calibration) together with a custom shell script, `camera_intrinsics_calibration.sh`, and a calib.io calibration target.
+
+### Launch and Usage
+
+Run the `camera_intrinsics_calibration.sh` script. It will prompt you to select the camera to calibrate:
+
+```shell
+Enter camera position ['left', 'middle', 'right'] to calculate intrinsics for:
+```
+
+Enter the desired camera position and press **Enter**.
+
+The calibration GUI will then open in a single window. Move the calibration board so the entire 8×11 calibration target is visible from different positions and angles. Make sure to also rotate the board about its roll and pitch axes. As sufficient calibration data is collected, the progress bars on the right side of the GUI will fill.
+
+Once all progress bars are full, the **CALIBRATE** button becomes available. Click it and wait for the optimization to finish. The GUI may become temporarily unresponsive while the calibration is being computed.
+
+After the optimization completes, the **SAVE** and **UPLOAD** buttons will become available.
+
+> **Warning**
+> Do **not** click **UPLOAD**. This feature attempts to upload the calibration directly to the camera, but it is not supported by the Basler driver. Clicking it will cause the GUI to freeze and your calibration results will be lost.
+
+Click **SAVE** to write the calibration results to a temporary file. You can preview the calibration results in the GUI before closing it.
+
+When you are satisfied with the results, close the GUI. The terminal running the script will ask whether you want to overwrite the existing calibration parameters for the selected camera.
+
+Press any key to overwrite the existing parameters, or press **Ctrl+C** to cancel.
+
+If confirmed, the new calibration parameters will replace the existing files located at:
+
+```text
+/ros2_ws/config/intrinsics/{camera_pos}/
+```
 
 ## Extrinsic Calibration
 For extrinsic calibration, this project uses the FraunhoferIOSB [multisensor calibration toolbox](https://github.com/FraunhoferIOSB/multisensor_calibration) with a custom shell script ```launch_extrinsic_calibration.sh``` and a custom calibration target. 
