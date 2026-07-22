@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y \
     python3-venv \
     python3-git \
     python3 \
+    python3-dotenv \
+    python3-serial \
     git \
     wget \
     iproute2 \
