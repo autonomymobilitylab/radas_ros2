@@ -53,24 +53,13 @@ def generate_launch_description():
     )
     ntrip_client = ExecuteProcess(
         cmd=[
-            "str2str",
-            "-in",
-            (
-                f"ntrip://{os.getenv("NTRIPUSER")}:"
-                f"{os.getenv('NTRIPPASS')}"
-                "@opencaster.nls.fi:2101/VRS-FKP"
-            ),
-            "-out",
-            "serial://ttyACM0:115200:8:n:1:of",
-            "-p",
-            "60.188333",
-            "24.823917",
-            "4",
-            "-n",
-            "5000",
-            "-t",
-            "3",
+            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/src/ntrip_client/ros_ntrip_client.py",
         ],
+        additional_env={
+            "NTRIPUSER": os.getenv("NTRIPUSER"),
+            "NTRIPPASS": os.getenv("NTRIPPASS"),
+        },
         output="screen",
         respawn=True,
         respawn_delay=5.0,

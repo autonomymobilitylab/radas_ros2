@@ -1,6 +1,6 @@
 /Gnss/gnss_rover:
   ros__parameters:
-    device: "serial:/dev/ttyACM1"
+    device: "serial:/dev/ttyACM0"
 
     serial:
       baudrate: 921600
@@ -127,7 +127,7 @@
       serial_1:
         port: "USB1"
         baud_rate: 115200
-        rtk_standard: "auto"
+        rtk_standard: "RTCMv3"
         send_gga: "off"
         keep_open: true
 
@@ -145,7 +145,7 @@
       publish_only_valid: false
       navsatfix: true
       gpsfix: true
-      gpgga: false
+      gpgga: true
       gprmc: false
       gpst: false
       measepoch: false
