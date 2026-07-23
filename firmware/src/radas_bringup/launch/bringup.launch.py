@@ -1,12 +1,24 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import ExecuteProcess
+from launch.actions import ExecuteProcess, TimerAction
 
 from ament_index_python.packages import get_package_share_directory
 import os
 
 
 def generate_launch_description():
+    ptp_configurator = TimerAction(
+        period=5.0,
+        actions=[
+            Node(
+                package="basler_ptp_config",
+                executable="basler_ptp_configurator",
+                name="basler_ptp_configurator",
+                output="screen",
+            )
+        ]
+    )
+
     left_data_collection = ExecuteProcess(
         cmd=[
             "/ros2_ws/src/.venv/bin/python3",
@@ -81,8 +93,6 @@ def generate_launch_description():
                 },
             ],
         ),
-        left_data_collection,
-        middle_data_collection,
-        right_data_collection,
+        #ptp_configurator,
     ]
     return LaunchDescription(nodes)
