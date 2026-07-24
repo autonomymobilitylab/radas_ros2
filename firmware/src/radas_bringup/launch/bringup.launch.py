@@ -127,6 +127,13 @@ def generate_launch_description():
                 "/opt/ros/jazzy/share/septentrio_gnss_driver/config/custom_rover.yaml"
             ],
         ),
+        Node(
+            package='xsens_mti_ros2_driver',
+            executable='xsens_mti_node',
+            name='xsens_mti_node',
+            output='screen',
+            parameters=["/ros2_ws/config/xsens_param.yaml"],
+        ),
         ntrip_client,
     ]
     return LaunchDescription(nodes)

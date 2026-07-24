@@ -183,4 +183,4 @@
 
     # Logger
 
-    activate_debug_log: true
+    activate_debug_log: false
