@@ -94,6 +94,19 @@ def generate_launch_description():
         cwd="/ros2_ws",
         output="screen",
     )
+    ntrip_client = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/src/ntrip_client/ros_ntrip_client.py",
+        ],
+        additional_env={
+            "NTRIPUSER": os.getenv("NTRIPUSER"),
+            "NTRIPPASS": os.getenv("NTRIPPASS"),
+        },
+        output="screen",
+        respawn=True,
+        respawn_delay=5.0,
+    )
 
     nodes = [
         Node(
@@ -185,6 +198,13 @@ def generate_launch_description():
                 os.path.join(ws_dir, "src", "webUI", "diagnostic_aggregator.yaml")
             ],
         ),
+        Node(
+            package='xsens_mti_ros2_driver',
+            executable='xsens_mti_node',
+            name='xsens_mti_node',
+            output='screen',
+            parameters=["/ros2_ws/config/xsens_param.yaml"],
+        ),
         web_ui,
         lidar_status,
         gps_status,
@@ -194,5 +214,6 @@ def generate_launch_description():
         #left_data_collection,
         #middle_data_collection,
         #right_data_collection,
+        ntrip_client,
     ]
     return LaunchDescription(nodes)
