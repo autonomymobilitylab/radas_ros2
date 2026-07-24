@@ -4,6 +4,9 @@ from launch.actions import ExecuteProcess
 
 from ament_index_python.packages import get_package_share_directory
 import os
+from dotenv import load_dotenv
+
+load_dotenv("/ros2_ws/src/.env")
 
 
 def generate_launch_description():
@@ -49,11 +52,11 @@ def generate_launch_description():
     #    ],
     #    cwd="/ros2_ws",
     #)
-    """diagnostic_config_file = os.path.join(
-       get_package_share_directory('radas'),
-       'config',
-       'diagnostic_aggregator.yaml'
-    )"""
+    #diagnostic_config_file = os.path.join(
+    #   get_package_share_directory('radas'),
+    #   'config',
+    #   'diagnostic_aggregator.yaml'
+    #)
 
     ws_dir = "/ros2_ws"
     web_ui = ExecuteProcess(
@@ -90,6 +93,14 @@ def generate_launch_description():
         cmd=[
             "/ros2_ws/.venv/bin/python3",
             "/ros2_ws/src/webUI/camera_diagnostics.py"
+            ],
+        cwd="/ros2_ws",
+        output="screen",
+    )
+    imu_status = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/.venv/bin/python3",
+            "/ros2_ws/src/webUI/imu_diagnostics.py",
             ],
         cwd="/ros2_ws",
         output="screen",
@@ -199,6 +210,18 @@ def generate_launch_description():
             ],
         ),
         Node(
+            package="septentrio_gnss_driver",
+            executable="septentrio_gnss_driver_node",
+            name="gnss_rover",
+            namespace="Gnss",
+            output="screen",
+            emulate_tty=True,
+            sigterm_timeout="20",
+            parameters=[
+                "/opt/ros/jazzy/share/septentrio_gnss_driver/config/custom_rover.yaml"
+            ],
+        ),
+        Node(
             package='xsens_mti_ros2_driver',
             executable='xsens_mti_node',
             name='xsens_mti_node',
@@ -215,5 +238,6 @@ def generate_launch_description():
         #middle_data_collection,
         #right_data_collection,
         ntrip_client,
+        imu_status,
     ]
     return LaunchDescription(nodes)
