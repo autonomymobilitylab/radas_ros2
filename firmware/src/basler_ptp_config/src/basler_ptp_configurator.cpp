@@ -11,6 +11,7 @@
 
 #include "pylon_ros2_camera_interfaces/srv/get_ptp_status.hpp"
 #include "pylon_ros2_camera_interfaces/srv/issue_scheduled_action_command.hpp"
+#include "pylon_ros2_camera_interfaces/srv/set_action_trigger_configuration.hpp"
 #include "pylon_ros2_camera_interfaces/srv/set_integer_value.hpp"
 #include "pylon_ros2_camera_interfaces/srv/set_roi.hpp"
 
@@ -28,12 +29,12 @@ public:
     broadcast_address_ =
         declare_parameter<std::string>("broadcast_address", "192.168.1.255");
 
-    device_key_ = declare_parameter<int64_t>("device_key", 0x32dcafe3);
-    group_key_ = declare_parameter<int64_t>("group_key", 0x112233);
-    group_mask_ = declare_parameter<int64_t>("group_mask", 0xffffffffULL);
+    device_key_ = declare_parameter<int64_t>("device_key", 1);
+    group_key_ = declare_parameter<int64_t>("group_key", 1);
+    group_mask_ = declare_parameter<int64_t>("group_mask", 1);
 
     action_delay_ns_ =
-        declare_parameter<int64_t>("action_delay_ns", 1000000000LL);
+        declare_parameter<int64_t>("action_delay_ns", 100000000);
 
     action_sender_ =
         declare_parameter<std::string>("action_sender", "middle");
@@ -54,6 +55,15 @@ public:
       all_ok &= configure_camera(position);
     }
 
+    if (!all_ok)
+    {
+      RCLCPP_ERROR(
+          get_logger(),
+          "At least one camera configuration failed.");
+
+      return false;
+    }
+
     for (const auto &position : positions_)
     {
       all_ok &= request_ptp_status(position);
@@ -63,9 +73,29 @@ public:
     {
       RCLCPP_ERROR(
           get_logger(),
-          "At least one configuration/status service call failed.");
+          "At least one PTP status request failed.");
+
       return false;
     }
+
+    RCLCPP_INFO(
+        get_logger(),
+        "All cameras configured. Sending scheduled action command.");
+
+    all_ok &= issue_scheduled_action(action_sender_);
+
+    if (!all_ok)
+    {
+      RCLCPP_ERROR(
+          get_logger(),
+          "Scheduled action command failed.");
+
+      return false;
+    }
+
+    RCLCPP_INFO(
+        get_logger(),
+        "Scheduled action command service call completed.");
 
     return true;
   }
@@ -118,7 +148,8 @@ private:
       return false;
     }
 
-    if (!future.get())
+    const auto response = future.get();
+    if (!response)
     {
       RCLCPP_ERROR(
           get_logger(), "Empty response from service: %s",
@@ -171,28 +202,56 @@ private:
     return call_service<Service>(base + "/set_roi", request);
   }
 
+  bool set_action_trigger_configuration(const std::string &base)
+  {
+    using Service =
+        pylon_ros2_camera_interfaces::srv::SetActionTriggerConfiguration;
+
+    auto request = std::make_shared<Service::Request>();
+
+    request->action_device_key =
+        static_cast<int64_t>(device_key_);
+
+    request->action_group_key =
+        static_cast<int64_t>(group_key_);
+
+    request->action_group_mask =
+        static_cast<int64_t>(group_mask_);
+
+    RCLCPP_INFO(
+        get_logger(),
+        "Configuring action trigger on %s: "
+        "device_key=0x%08x, group_key=0x%08x, group_mask=0x%08x",
+        base.c_str(),
+        static_cast<uint32_t>(device_key_),
+        static_cast<uint32_t>(group_key_),
+        static_cast<uint32_t>(group_mask_));
+
+    return call_service<Service>(
+        base + "/set_action_trigger_configuration",
+        request);
+  }
+
   bool configure_camera(const std::string &position)
   {
     const std::string base = camera_base(position);
     bool ok = true;
 
     ok &= set_bool(base, "enable_ptp_management_protocol", true);
-    ok &= set_integer(base, "set_ptp_priority", 255);
-    ok &= set_integer(base, "set_ptp_profile", 0);
-    ok &= set_integer(base, "set_ptp_network_mode", 0);
-
-    //ok &= set_integer(base, "set_ptp_uc_port_address_index", 0);
-    //ok &= set_integer(base, "set_ptp_uc_port_address", 0);
+    ok &= set_integer(base, "set_ptp_priority", 127);
+    ok &= set_integer(base, "set_ptp_profile", 1);
+    ok &= set_integer(base, "set_ptp_network_mode", 2);
 
     ok &= set_bool(base, "enable_two_step_operation", false);
     ok &= set_bool(base, "enable_ptp", true);
     ok &= set_roi(base);
 
     // Trigger configuration
-    // 3 = FrameStart, according to your driver enum
-    ok &= set_integer(base, "set_trigger_selector", 3);
+    ok &= set_action_trigger_configuration(base);
+    // 0 = FrameStart
+    ok &= set_integer(base, "set_trigger_selector", 0);
 
-    // 8 = Action1, according to your driver enum
+    // 5 = Action1
     ok &= set_integer(base, "set_trigger_source", 5);
 
     // Enable trigger mode
@@ -253,9 +312,9 @@ private:
 
     std::ostringstream details;
     details << "Sending scheduled action through camera '" << sender_position
-            << "': device_key=0x" << std::hex << device_key_
-            << ", group_key=0x" << group_key_
-            << ", group_mask=0x" << group_mask_
+            << "': device_key=0x" << std::hex << static_cast<uint32_t>(device_key_)
+            << ", group_key=0x" << static_cast<uint32_t>(group_key_)
+            << ", group_mask=0x" << static_cast<uint32_t>(group_mask_)
             << std::dec << ", delay_ns=" << action_delay_ns_
             << ", broadcast=" << broadcast_address_;
 
