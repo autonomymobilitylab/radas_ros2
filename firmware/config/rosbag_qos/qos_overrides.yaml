@@ -1,0 +1,78 @@
+# Fill this out with the full topic names in the end. 
+
+# How the rosbag command is structured in this case (again replace with correct topic names)
+#ros2 bag record \
+#  --qos-profile-overrides-path qos_overrides.yaml \
+#  /Basler_front/image \
+#  /Basler_left/image \
+#  /Basler_right/image \
+#  /lidar_points_xt/jt \
+#  /lidar_points_xt2/jt \
+#  /imu \
+#  /gps \
+#  /tf \
+#  /tf_static
+
+# Camera QoS-profile
+/Basler_left/pylon_ros2_camera_node/image_raw:
+  reliability: reliable
+  durability: volatile
+  history: keep_last
+  depth: 10
+
+/Basler_middle/pylon_ros2_camera_node/image_raw:
+  reliability: reliable
+  durability: volatile
+  history: keep_last
+  depth: 10
+
+/Basler_right/pylon_ros2_camera_node/image_raw:
+  reliability: reliable
+  durability: volatile
+  history: keep_last
+  depth: 10
+
+# LIDAR
+/Lidar_points_xt:
+  reliability: reliable
+  durability: volatile
+  history: keep_last
+  depth: 10
+
+/Lidar_points_jt:
+  reliability: reliable
+  durability: volatile
+  history: keep_last
+  depth: 10
+
+# IMU/GPS, not dropping frames is important for localization
+/imu/acceleration_hr: 
+  reliability: reliable
+  durability: volatile
+  history: keep_last
+  depth: 200
+
+/imu/angular_velocity_hr:
+  reliability: reliable
+  durability: volatile
+  history: keep_last
+  depth: 200
+
+/imu/mag:
+  reliability: reliable
+  durability: volatile
+  history: keep_last
+  depth: 200
+
+/gpsfix:
+  reliability: reliable
+  durability: volatile
+  history: keep_last
+  depth: 20
+
+# tf
+/tf_static:
+  reliability: reliable
+  durability: transient_local
+  history: keep_last
+  depth: 1
