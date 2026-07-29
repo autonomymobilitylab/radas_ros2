@@ -225,6 +225,7 @@ def generate_launch_description():
             package='xsens_mti_ros2_driver',
             executable='xsens_mti_node',
             name='xsens_mti_node',
+            namespace="Imu",
             output='screen',
             parameters=["/ros2_ws/config/xsens_param.yaml"],
         ),
