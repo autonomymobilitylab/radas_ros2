@@ -20,6 +20,12 @@
   history: keep_last
   depth: 10
 
+/Basler_left/pylon_ros2_camera_node/image_raw:
+  reliability: reliable
+  durability: volatile
+  history: keep least
+  depth: 10
+
 /Basler_middle/pylon_ros2_camera_node/image_raw:
   reliability: reliable
   durability: volatile
