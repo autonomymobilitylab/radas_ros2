@@ -28,14 +28,14 @@ class GpsDiagnostics(Node):
 
         # These subscriptions are valid even before the topics have publishers.
         # ROS 2 connects them automatically when the receiver starts publishing.
-        self.create_subscription(GPSFix, "/gpsfix", self.gpsfix_callback, 10)
+        self.create_subscription(GPSFix, "/Gnss/gpsfix", self.gpsfix_callback, 10)
         self.create_subscription(
-            PVTGeodetic, "/pvtgeodetic", self.pvtgeodetic_callback, 10
+            PVTGeodetic, "/Gnss/pvtgeodetic", self.pvtgeodetic_callback, 10
         )
         self.create_subscription(
-            AIMPlusStatus, "/aimplusstatus", self.aimplus_callback, 10
+            AIMPlusStatus, "/Gnss/aimplusstatus", self.aimplus_callback, 10
         )
-        self.create_subscription(RFStatus, "/rfstatus", self.rfstatus_callback, 10)
+        self.create_subscription(RFStatus, "/Gnss/rfstatus", self.rfstatus_callback, 10)
 
         self.publisher = self.create_publisher(DiagnosticArray, "/diagnostics", 10)
         self.create_timer(1.0, self.publish_diagnostics)

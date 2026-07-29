@@ -33,6 +33,7 @@ services:
       - ws_install:/ros2_ws/install
       - ws_log:/ros2_ws/log
       - ${HOME}/.Xauthority:/root/.Xauthority
+      - ./config/gnss/:/opt/ros/jazzy/share/septentrio_gnss_driver/config/
       - ./.env:/ros2_ws/src/.env
     environment:
       - DISPLAY=${DISPLAY}
