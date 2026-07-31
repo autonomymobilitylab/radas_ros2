@@ -37,6 +37,8 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-gps-msgs \
     ros-jazzy-gtest-vendor \
     ros-jazzy-septentrio-gnss-driver \
+    ros-jazzy-image-transport \
+    ros-jazzy-compressed-image-transport \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Pylon SDK
