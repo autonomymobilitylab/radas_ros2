@@ -44,10 +44,10 @@ def generate_launch_description():
         cwd="/ros2_ws",
     )
 
-    hardware_trigger_configurator = ExecuteProcess(
+    camera_configurator = ExecuteProcess(
         cmd=[
             "/ros2_ws/src/.venv/bin/python3",
-            "/ros2_ws/src/cameras/hardware_trigger.py",
+            "/ros2_ws/src/cameras/camera_configurator.py",
         ],
         cwd="/ros2_ws",
         output="screen",
@@ -102,7 +102,7 @@ def generate_launch_description():
                 },
             ],
         ),
-        hardware_trigger_configurator,
+        camera_configurator,
         #ptp_configurator,
     ]
     return LaunchDescription(nodes)
