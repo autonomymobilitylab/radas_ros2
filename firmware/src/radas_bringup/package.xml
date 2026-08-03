@@ -6,6 +6,9 @@
   <description>Ros2 implementation for RADAS sensor system</description>
   <maintainer email="joel.te.ventola@gmail.com">DiscoFlower8890</maintainer>
   <license>Apache-2.0</license>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>jt_correction</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

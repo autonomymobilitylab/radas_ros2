@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y \
     python3-rosdep \
     python3-venv \
     python3-git \
+    python3-dotenv \
+    python3-serial \
     git \
     wget \
     iproute2 \
@@ -19,12 +21,22 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender1 \
     libxtst6 \
+    libboost-all-dev \
+    libgeographiclib-dev \
+    libcap-dev \
+    rtklib \
     ros-jazzy-diagnostic-updater \
     ros-jazzy-pcl-ros \
     ros-jazzy-nmea-msgs \
     ros-jazzy-rtcm-msgs \
     ros-jazzy-camera-info-manager \
     ros-jazzy-cv-bridge \
+    ros-jazzy-multisensor-calibration \
+    ros-jazzy-camera-calibration \
+    ros-jazzy-mavros-msgs \
+    ros-jazzy-gps-msgs \
+    ros-jazzy-gtest-vendor \
+    ros-jazzy-septentrio-gnss-driver \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Pylon SDK
@@ -40,8 +52,10 @@ RUN wget -q "https://downloads-bsl.baslerweb.com/software/pylon%2026.04/pylon-26
 WORKDIR /underlay_ws
 RUN mkdir -p src
 
-# Clone Pylon
-RUN git clone https://github.com/joevento/pylon-ros-camera.git src/pylon-ros2-camera
+# Clone Hesai and Pylon
+RUN git clone --recursive https://github.com/HesaiTechnology/HesaiLidar_ROS_2.0.git src/hesai_ros_driver && \
+    git clone https://github.com/basler/pylon-ros-camera.git src/pylon-ros2-camera && \
+    git clone -b ros2 https://github.com/xsenssupport/Xsens_MTi_ROS_Driver_and_Ntrip_Client.git src/xsens-mti-ros2
 
 # Install dependencies using rosdep
 RUN apt-get update && \

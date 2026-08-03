@@ -45,10 +45,13 @@ services:
       - ./config:/ros2_ws/config
       - ./output_data:/data
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - ./output_data:/data
       - ws_build:/ros2_ws/build
       - ws_install:/ros2_ws/install
       - ws_log:/ros2_ws/log
       - ${HOME}/.Xauthority:/root/.Xauthority
+      - ./config/gnss/:/opt/ros/jazzy/share/septentrio_gnss_driver/config/
+      - ./.env:/ros2_ws/src/.env
     environment:
       - DISPLAY=${DISPLAY}
       - XAUTHORITY=/root/.Xauthority
@@ -58,6 +61,8 @@ services:
     #command: >
     #  bash -lc "source /entrypoint.sh &&
     #  ros2 launch radas_bringup bringup.launch.py"
+    group_add:
+      - dialout
 
 volumes:
   ws_build:
