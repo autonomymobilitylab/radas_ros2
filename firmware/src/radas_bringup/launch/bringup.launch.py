@@ -9,94 +9,6 @@ from dotenv import load_dotenv
 load_dotenv("/ros2_ws/src/.env")
 
 def generate_launch_description():
-    ptp_configurator = TimerAction(
-        period=5.0,
-        actions=[
-            Node(
-                package="basler_ptp_config",
-                executable="basler_ptp_configurator",
-                name="basler_ptp_configurator",
-                output="screen",
-            )
-        ]
-    camera_positions = ["left", "middle", "right"]
-
-    roi_calls = [
-        TimerAction(
-            period=5.0,
-            actions=[
-                ExecuteProcess(
-                    cmd=[
-                        "ros2",
-                        "service",
-                        "call",
-                        f"/Basler_{pos}/pylon_ros2_camera_node/set_roi",
-                        "pylon_ros2_camera_interfaces/srv/SetROI",
-                        (
-                            "{target_roi: {"
-                            "x_offset: 0, "
-                            "y_offset: 0, "
-                            "height: 1200, "
-                            "width: 1920, "
-                            "do_rectify: false"
-                            "}}"
-                        ),
-                    ],
-                    output="screen",
-                )
-            ],
-        )
-        for pos in camera_positions
-    ]
-
-    hemi_data_collection = ExecuteProcess(
-        cmd=[
-            "/ros2_ws/src/.venv/bin/python3",
-            "/ros2_ws/src/lidars/lidarnode.py",
-            "--lidar-name=xt",
-        ],
-        cwd="/ros2_ws",
-    )
-
-    dome_data_collection = ExecuteProcess(
-        cmd=[
-            "/ros2_ws/src/.venv/bin/python3",
-            "/ros2_ws/src/lidars/lidarnode.py",
-            "--lidar-name=jt",
-        ],
-        cwd="/ros2_ws",
-    )
-
-    left_data_collection = ExecuteProcess(
-        cmd=[
-            "/ros2_ws/src/.venv/bin/python3",
-            "/ros2_ws/src/cameras/cameranode.py",
-            "--camera-name=Basler_left",
-        ],
-        cwd="/ros2_ws",
-    )
-    middle_data_collection = ExecuteProcess(
-        cmd=[
-            "/ros2_ws/src/.venv/bin/python3",
-            "/ros2_ws/src/cameras/cameranode.py",
-            "--camera-name=Basler_middle",
-        ],
-        cwd="/ros2_ws",
-    )
-    right_data_collection = ExecuteProcess(
-        cmd=[
-            "/ros2_ws/src/.venv/bin/python3",
-            "/ros2_ws/src/cameras/cameranode.py",
-            "--camera-name=Basler_right",
-        ],
-        cwd="/ros2_ws",
-    )
-    diagnostic_config_file = os.path.join(
-        get_package_share_directory('radas'),
-        'config',
-        'diagnostic_aggregator.yaml'
-    )
-
     ws_dir = "/ros2_ws"
     web_ui = ExecuteProcess(
         cmd=[
@@ -290,14 +202,8 @@ def generate_launch_description():
         lidar_status,
         gps_status,
         camera_status,
-        #hemi_data_collection,
-        #dome_data_collection,
-        #left_data_collection,
-        #middle_data_collection,
-        #right_data_collection,
         camera_configurator,
-        #ptp_configurator,
         ntrip_client,
         imu_status,
     ]
-    return LaunchDescription(nodes + roi_calls)
+    return LaunchDescription(nodes)
