@@ -9,6 +9,16 @@ from dotenv import load_dotenv
 load_dotenv("/ros2_ws/src/.env")
 
 def generate_launch_description():
+    ptp_configurator = TimerAction(
+        period=5.0,
+        actions=[
+            Node(
+                package="basler_ptp_config",
+                executable="basler_ptp_configurator",
+                name="basler_ptp_configurator",
+                output="screen",
+            )
+        ]
     camera_positions = ["left", "middle", "right"]
 
     roi_calls = [
@@ -95,6 +105,15 @@ def generate_launch_description():
         respawn_delay=5.0,
     )
 
+
+    camera_configurator = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/src/cameras/camera_configurator.py",
+        ],
+        cwd="/ros2_ws",
+        output="screen",
+    )
 
     nodes = [
         Node(
@@ -212,5 +231,7 @@ def generate_launch_description():
         left_data_collection,
         middle_data_collection,
         right_data_collection,
+        camera_configurator,
+        #ptp_configurator,
     ]
     return LaunchDescription(nodes + roi_calls)
