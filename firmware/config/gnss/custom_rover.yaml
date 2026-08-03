@@ -1,6 +1,6 @@
 /Gnss/gnss_rover:
   ros__parameters:
-    device: "serial:/dev/ttyACM1"
+    device: "serial:/dev/ttyACM0"
 
     serial:
       baudrate: 921600

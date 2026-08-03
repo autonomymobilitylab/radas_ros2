@@ -1,6 +1,6 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import ExecuteProcess
+from launch.actions import ExecuteProcess, TimerAction
 
 from ament_index_python.packages import get_package_share_directory
 import os
@@ -8,8 +8,47 @@ from dotenv import load_dotenv
 
 load_dotenv("/ros2_ws/src/.env")
 
-
 def generate_launch_description():
+    ptp_configurator = TimerAction(
+        period=5.0,
+        actions=[
+            Node(
+                package="basler_ptp_config",
+                executable="basler_ptp_configurator",
+                name="basler_ptp_configurator",
+                output="screen",
+            )
+        ]
+    camera_positions = ["left", "middle", "right"]
+
+    roi_calls = [
+        TimerAction(
+            period=5.0,
+            actions=[
+                ExecuteProcess(
+                    cmd=[
+                        "ros2",
+                        "service",
+                        "call",
+                        f"/Basler_{pos}/pylon_ros2_camera_node/set_roi",
+                        "pylon_ros2_camera_interfaces/srv/SetROI",
+                        (
+                            "{target_roi: {"
+                            "x_offset: 0, "
+                            "y_offset: 0, "
+                            "height: 1200, "
+                            "width: 1920, "
+                            "do_rectify: false"
+                            "}}"
+                        ),
+                    ],
+                    output="screen",
+                )
+            ],
+        )
+        for pos in camera_positions
+    ]
+
     hemi_data_collection = ExecuteProcess(
         cmd=[
             "/ros2_ws/src/.venv/bin/python3",
@@ -118,6 +157,14 @@ def generate_launch_description():
         respawn=True,
         respawn_delay=5.0,
     )
+    camera_configurator = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/src/cameras/camera_configurator.py",
+        ],
+        cwd="/ros2_ws",
+        output="screen",
+    )
 
     nodes = [
         Node(
@@ -210,6 +257,16 @@ def generate_launch_description():
             ],
         ),
         Node(
+            package="jt_correction",
+            executable="jt_pointcloud_corrector",
+            name="jt_pointcloud_corrector",
+            output="screen",
+            parameters=["/ros2_ws/config/jt_calibration.yaml"],
+            remappings=[
+                ("input", "/lidar_points_jt"),
+            ],
+        ),
+        Node(
             package="septentrio_gnss_driver",
             executable="septentrio_gnss_driver_node",
             name="gnss_rover",
@@ -238,7 +295,9 @@ def generate_launch_description():
         #left_data_collection,
         #middle_data_collection,
         #right_data_collection,
+        camera_configurator,
+        #ptp_configurator,
         ntrip_client,
         imu_status,
     ]
-    return LaunchDescription(nodes)
+    return LaunchDescription(nodes + roi_calls)
