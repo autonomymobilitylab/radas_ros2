@@ -4,7 +4,9 @@ from launch.actions import ExecuteProcess
 
 from ament_index_python.packages import get_package_share_directory
 import os
+from dotenv import load_dotenv
 
+load_dotenv("/ros2_ws/src/.env")
 
 def generate_launch_description():
     hemi_data_collection = ExecuteProcess(
@@ -49,6 +51,20 @@ def generate_launch_description():
         ],
         cwd="/ros2_ws",
     )
+    ntrip_client = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/src/ntrip_client/ros_ntrip_client.py",
+        ],
+        additional_env={
+            "NTRIPUSER": os.getenv("NTRIPUSER"),
+            "NTRIPPASS": os.getenv("NTRIPPASS"),
+        },
+        output="screen",
+        respawn=True,
+        respawn_delay=5.0,
+    )
+
 
     nodes = [
         Node(
@@ -99,10 +115,25 @@ def generate_launch_description():
                 },
             ],
         ),
-        hemi_data_collection,
-        dome_data_collection,
-        left_data_collection,
-        middle_data_collection,
-        right_data_collection,
+        Node(
+            package="septentrio_gnss_driver",
+            executable="septentrio_gnss_driver_node",
+            name="gnss_rover",
+            namespace="Gnss",
+            output="screen",
+            emulate_tty=True,
+            sigterm_timeout="20",
+            parameters=[
+                "/opt/ros/jazzy/share/septentrio_gnss_driver/config/custom_rover.yaml"
+            ],
+        ),
+        Node(
+            package='xsens_mti_ros2_driver',
+            executable='xsens_mti_node',
+            name='xsens_mti_node',
+            output='screen',
+            parameters=["/ros2_ws/config/xsens_param.yaml"],
+        ),
+        ntrip_client,
     ]
     return LaunchDescription(nodes)
