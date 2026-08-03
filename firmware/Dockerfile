@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     python3-rosdep \
     python3-venv \
     python3-git \
+    python3 \
     python3-dotenv \
     python3-serial \
     git \
@@ -31,12 +32,16 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-rtcm-msgs \
     ros-jazzy-camera-info-manager \
     ros-jazzy-cv-bridge \
+    ros-jazzy-diagnostic-aggregator \
+    ros-jazzy-cv-bridge \
     ros-jazzy-multisensor-calibration \
     ros-jazzy-camera-calibration \
     ros-jazzy-mavros-msgs \
     ros-jazzy-gps-msgs \
     ros-jazzy-gtest-vendor \
     ros-jazzy-septentrio-gnss-driver \
+    ros-jazzy-image-transport \
+    ros-jazzy-compressed-image-transport \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Pylon SDK
@@ -75,6 +80,11 @@ RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc && \
 # Set up the firmware workspace
 WORKDIR /ros2_ws
 RUN mkdir -p src
+
+# setup python .venv for the webUI
+RUN python3 -m venv /ros2_ws/.venv && \
+    /ros2_ws/.venv/bin/pip install --upgrade pip && \
+    /ros2_ws/.venv/bin/pip install fastapi uvicorn jinja2 pyftdi PyYAML numpy
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

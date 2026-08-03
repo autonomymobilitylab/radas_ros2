@@ -91,6 +91,59 @@ def generate_launch_description():
         ],
         cwd="/ros2_ws",
     )
+    diagnostic_config_file = os.path.join(
+        get_package_share_directory('radas'),
+        'config',
+        'diagnostic_aggregator.yaml'
+    )
+
+    ws_dir = "/ros2_ws"
+    web_ui = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/.venv/bin/python3",
+            "-m",
+            "uvicorn",
+            "src.webUI.app:app",
+            "--host",
+            "0.0.0.0",
+            "--port",
+            "8080",
+            ],
+        cwd="/ros2_ws",
+        output="screen",
+        )
+    lidar_status = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/.venv/bin/python3",
+            "/ros2_ws/src/webUI/lidar_diagnostics.py"
+            ],
+        cwd="/ros2_ws",
+        output="screen",
+    )
+    gps_status = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/.venv/bin/python3",
+            "/ros2_ws/src/webUI/gps_diagnostics.py"
+            ],
+        cwd="/ros2_ws",
+        output="screen",
+    )
+    camera_status = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/.venv/bin/python3",
+            "/ros2_ws/src/webUI/camera_diagnostics.py"
+            ],
+        cwd="/ros2_ws",
+        output="screen",
+    )
+    imu_status = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/.venv/bin/python3",
+            "/ros2_ws/src/webUI/imu_diagnostics.py",
+            ],
+        cwd="/ros2_ws",
+        output="screen",
+    )
     ntrip_client = ExecuteProcess(
         cmd=[
             "/ros2_ws/src/.venv/bin/python3",
@@ -104,8 +157,6 @@ def generate_launch_description():
         respawn=True,
         respawn_delay=5.0,
     )
-
-
     camera_configurator = ExecuteProcess(
         cmd=[
             "/ros2_ws/src/.venv/bin/python3",
@@ -197,6 +248,15 @@ def generate_launch_description():
             ],
         ),
         Node(
+            package="diagnostic_aggregator",
+            executable="aggregator_node",
+            name="analyzers",
+            output="screen",
+            parameters=[
+                os.path.join(ws_dir, "src", "webUI", "diagnostic_aggregator.yaml")
+            ],
+        ),
+        Node(
             package="jt_correction",
             executable="jt_pointcloud_corrector",
             name="jt_pointcloud_corrector",
@@ -222,16 +282,22 @@ def generate_launch_description():
             package='xsens_mti_ros2_driver',
             executable='xsens_mti_node',
             name='xsens_mti_node',
+            namespace="Imu",
             output='screen',
             parameters=["/ros2_ws/config/xsens_param.yaml"],
         ),
-        ntrip_client,
-        hemi_data_collection,
-        dome_data_collection,
-        left_data_collection,
-        middle_data_collection,
-        right_data_collection,
+        web_ui,
+        lidar_status,
+        gps_status,
+        camera_status,
+        #hemi_data_collection,
+        #dome_data_collection,
+        #left_data_collection,
+        #middle_data_collection,
+        #right_data_collection,
         camera_configurator,
         #ptp_configurator,
+        ntrip_client,
+        imu_status,
     ]
     return LaunchDescription(nodes + roi_calls)

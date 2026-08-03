@@ -1,0 +1,24 @@
+analyzers:
+  ros__parameters:
+    pub_rate: 1.0
+    path: Diagnostics
+
+    lidar:
+      type: diagnostic_aggregator/GenericAnalyzer
+      path: Lidar
+      contains: ["radas_xt", "radas_jt", "xt32", "jt128", "lidar", "Lidar"]
+
+    camera:
+      type: diagnostic_aggregator/GenericAnalyzer
+      path: Camera
+      contains: ["Camera/"]
+
+    imu:
+      type: diagnostic_aggregator/GenericAnalyzer
+      path: IMU
+      contains: ["IMU"]
+
+    gnss:
+      type: diagnostic_aggregator/GenericAnalyzer
+      path: GNSS
+      contains: ["GNSS", "GPS"]

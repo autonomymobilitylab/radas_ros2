@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Radas Web Interface</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <h1>Radas Web Interface</h1>
+
+    <button onclick="startCollecting()">
+        Start Collecting Data
+    </button>
+
+    <button onclick="stopCollecting()">
+        Stop Collecting Data
+    </button>
+
+    <h2>Data Collection Status</h2>
+    <div id="recording">
+        Data collection has not been started yet.
+    </div>
+    <div id="status">
+        Ready
+    </div>
+
+    <script>
+        async function startCollecting() {
+            const response = await fetch('/datacollection/start',
+                { method: 'POST' }
+            );
+
+            const data = await response.json();
+
+            document.getElementById('recording').innerText = data.message || "Data collection started.";
+        }
+
+        async function stopCollecting() {
+            const response = await fetch('/datacollection/stop',
+                { method: 'POST' }
+            );
+            const data = await response.json();
+            document.getElementById('recording').innerText = data.message || "Data collection stopped.";
+        }
+    </script>
+
+    <script>
+        function levelLabel(level) {
+            if (level === 0) return "Good";
+            if (level === 1) return "Warning";
+            if (level === 2) return "Error";
+            if (level === 3) return "Stale";
+            return "Unknown";
+        }
+
+        function valueOrDash(value, digits = null) {
+            if (value === null || value === undefined || Number.isNaN(value)) return "--";
+            return digits === null ? value : Number(value).toFixed(digits);
+        }
+
+        function renderGpsStatus(gps) {
+            document.getElementById("gps-status").innerText = gps.emoji || "⚫";
+            document.getElementById("gps-level").innerText = gps.level_text || "WAITING";
+            document.getElementById("gps-message").innerText = gps.message || "Waiting for satellite lock";
+            document.getElementById("gps-satellites").innerText =
+                `${valueOrDash(gps.satellites_used)} / ${valueOrDash(gps.satellites_visible)}`;
+            document.getElementById("gps-position").innerText =
+                gps.latitude == null ? "--" : `${valueOrDash(gps.latitude, 7)}, ${valueOrDash(gps.longitude, 7)}`;
+            document.getElementById("gps-altitude").innerText =
+                gps.altitude == null ? "--" : `${valueOrDash(gps.altitude, 2)} m`;
+            document.getElementById("gps-dop").innerText =
+                `HDOP ${valueOrDash(gps.hdop, 2)} / PDOP ${valueOrDash(gps.pdop, 2)}`;
+            document.getElementById("gps-security").innerText =
+                `Interference ${valueOrDash(gps.interference)} / Spoofing ${valueOrDash(gps.spoofing)}`;
+        }
+
+        function renderSensorSummary(sensors) {
+            const tbody = document.getElementById("sensor-summary-body");
+            tbody.innerHTML = "";
+
+            for (const sensor of sensors) {
+                const row = document.createElement("tr");
+                const hzText = sensor.hz == null
+                    ? "--"
+                    : `${sensor.hz} / ${sensor.expected_hz ?? "--"} Hz`;
+
+                row.innerHTML = `
+                    <td>${sensor.emoji}</td>
+                    <td>${sensor.name}</td>
+                    <td>${levelLabel(sensor.level)}</td>
+                    <td class="hz-column">${hzText}</td>
+                    <td>${sensor.packet_loss ?? "--"}</td>
+                    <td>${sensor.details ?? sensor.message ?? "--"}</td>
+                `;
+
+                tbody.appendChild(row);
+            }
+        }
+    </script>
+    <h2>Sensor Status</h2>
+
+    <table class="status-table">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Sensor</th>
+                <th>Level</th>
+                <th>Hz</th>
+                <th>Packet Loss</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody id="sensor-summary-body"></tbody>
+    </table>
+
+    <h2>GPS Status</h2>
+    <table class="status-table gps-table">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Level</th>
+                <th>Satellites Used / Visible</th>
+                <th>Position</th>
+                <th>Altitude</th>
+                <th>DOP</th>
+                <th>RF Security</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="gps-status">⚫</td>
+                <td><span id="gps-level">WAITING</span><br><small id="gps-message">Waiting for satellite lock</small></td>
+                <td id="gps-satellites">-- / --</td>
+                <td id="gps-position">--</td>
+                <td id="gps-altitude">--</td>
+                <td id="gps-dop">HDOP -- / PDOP --</td>
+                <td id="gps-security">Interference -- / Spoofing --</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+
+        async function updateDiagnostics() {
+            const response = await fetch('/diagnostics');
+            const data = await response.json();
+
+            renderSensorSummary(data.sensors || []);
+            renderGpsStatus(data.gps || {});
+
+            const statusEl = document.getElementById('status');
+
+            if (!data.last_update) {
+                statusEl.innerText = "Awaiting aggregated diagnostics...";
+            }
+            else {
+                const age = Date.now() / 1000 - data.last_update;
+
+                if (age > 5) {
+                    statusEl.innerText = "Diagnostics: timeout";
+                }
+                else {
+                    statusEl.innerText = `Diagnostics: ${data.overall_status || 'UNKNOWN'}`;
+                }
+            }
+
+            const recordingEl = document.getElementById('recording');
+
+            if (data.recording_message) {
+                recordingEl.innerText = data.recording_message;
+            }
+        }
+
+        setInterval(updateDiagnostics, 1000);
+        updateDiagnostics();
+    </script>
+</body>
+
+</html>
