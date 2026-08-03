@@ -3,3 +3,4 @@
 .venv
 log/
 src/log/
+output_data/

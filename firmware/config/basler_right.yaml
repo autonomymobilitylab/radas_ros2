@@ -14,7 +14,7 @@
     #  camera calibration parameters are stored. This URL string will be parsed
     #  from the ROS-CameraInfoManager:
     # camera_info_url: ""
-    # camera_info_url: package://pylon_ros2_camera_wrapper/config/camera_calibration.yaml
+    camera_info_url: file:///ros2_ws/config/instrinsics/right/ost.yaml
 
     #  The encoding of the pixels -- channel meaning, ordering, size
     #  taken from the list of strings in include/sensor_msgs/image_encodings.h
@@ -113,7 +113,7 @@
     #  To prevent lost frames configure the camera has to be configured
     #  with the MTU size the network card supports. A value greater 3000
     #  should be good (1500 for single-board computer)
-    mtu_size: 3000
+    mtu_size: 1500
 
     #  the inter-packet delay in ticks to prevent frame loss, support the network bandwith priorisation
     #  generally needs to modified if more than one cameras is involved or if hardware is not performing well 

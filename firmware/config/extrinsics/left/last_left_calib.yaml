@@ -1,0 +1,13 @@
+Transformation from
+  'xt32' (Frame ID: hesai_lidar_xt) as parent
+to
+  'camera_left' (Frame ID: camera_left) as child:
+	> XYZ: 0.336647 -0.0454409 -0.353106
+	> RPY: -1.56876 0.0116392 -2.49709
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Number of observations: 14
+Mean Reprojection Error (in pixel): 4.4007
+Deviation in poses of calibration target
+when transformed between sensor frames:
+	> XYZ (in m): 0.0414 0.0403 0.0099
