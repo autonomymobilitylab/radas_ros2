@@ -10,53 +10,53 @@ load_dotenv("/ros2_ws/src/.env")
 
 
 def generate_launch_description():
-    #hemi_data_collection = ExecuteProcess(
-    #    cmd=[
-    #        "/ros2_ws/src/.venv/bin/python3",
-    #        "/ros2_ws/src/lidars/lidarnode.py",
-    #        "--lidar-name=xt",
-    #    ],
-    #    cwd="/ros2_ws",
-    #)
+    hemi_data_collection = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/src/lidars/lidarnode.py",
+            "--lidar-name=xt",
+        ],
+        cwd="/ros2_ws",
+    )
 
-    #dome_data_collection = ExecuteProcess(
-    #    cmd=[
-    #        "/ros2_ws/src/.venv/bin/python3",
-    #        "/ros2_ws/src/lidars/lidarnode.py",
-    #        "--lidar-name=jt",
-    #    ],
-    #    cwd="/ros2_ws",
-    #)
+    dome_data_collection = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/src/lidars/lidarnode.py",
+            "--lidar-name=jt",
+        ],
+        cwd="/ros2_ws",
+    )
 
-    #left_data_collection = ExecuteProcess(
-    #    cmd=[
-    #        "/ros2_ws/src/.venv/bin/python3",
-    #        "/ros2_ws/src/cameras/cameranode.py",
-    #        "--camera-name=Basler_left",
-    #    ],
-    #    cwd="/ros2_ws",
-    #)
-    #middle_data_collection = ExecuteProcess(
-    #    cmd=[
-    #        "/ros2_ws/src/.venv/bin/python3",
-    #        "/ros2_ws/src/cameras/cameranode.py",
-    #        "--camera-name=Basler_middle",
-    #    ],
-    #    cwd="/ros2_ws",
-    #)
-    #right_data_collection = ExecuteProcess(
-    #    cmd=[
-    #        "/ros2_ws/src/.venv/bin/python3",
-    #        "/ros2_ws/src/cameras/cameranode.py",
-    #        "--camera-name=Basler_right",
-    #    ],
-    #    cwd="/ros2_ws",
-    #)
-    #diagnostic_config_file = os.path.join(
-    #   get_package_share_directory('radas'),
-    #   'config',
-    #   'diagnostic_aggregator.yaml'
-    #)
+    left_data_collection = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/src/cameras/cameranode.py",
+            "--camera-name=Basler_left",
+        ],
+        cwd="/ros2_ws",
+    )
+    middle_data_collection = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/src/cameras/cameranode.py",
+            "--camera-name=Basler_middle",
+        ],
+        cwd="/ros2_ws",
+    )
+    right_data_collection = ExecuteProcess(
+        cmd=[
+            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/src/cameras/cameranode.py",
+            "--camera-name=Basler_right",
+        ],
+        cwd="/ros2_ws",
+    )
+    diagnostic_config_file = os.path.join(
+        get_package_share_directory('radas'),
+        'config',
+        'diagnostic_aggregator.yaml'
+    )
 
     ws_dir = "/ros2_ws"
     web_ui = ExecuteProcess(
