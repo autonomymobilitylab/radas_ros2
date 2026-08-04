@@ -77,6 +77,10 @@ def generate_launch_description():
         cwd="/ros2_ws",
         output="screen",
     )
+    system_recorder = ExecuteProcess(
+        cmd=['python3', '/ros2_ws/src/testing/bag_system.py'],
+        output='screen'
+    )
 
     nodes = [
         Node(
@@ -205,5 +209,6 @@ def generate_launch_description():
         camera_configurator,
         ntrip_client,
         imu_status,
+        system_recorder,
     ]
     return LaunchDescription(nodes)
