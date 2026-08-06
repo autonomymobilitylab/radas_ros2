@@ -7,7 +7,10 @@ After=docker.service network-online.target
 Type=simple
 User=${SERVICE_USER}
 WorkingDirectory=${PROJECT_DIR}
-ExecStart=/usr/bin/docker compose up --build
+
+Environment="PROJECT_DIR=${PROJECT_DIR}"
+
+ExecStart=/usr/local/bin/start_radas_ros2.sh
 ExecStop=/usr/bin/docker compose down
 Restart=on-failure
 RestartSec=5
