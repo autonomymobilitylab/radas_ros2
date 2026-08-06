@@ -188,30 +188,60 @@ class SystemRecorder(Node):
     def pause_callback(self, request, response):
         with self.writer_lock:
             if not self.recording:
-                self.get_logger().warn('Pause request ignored: recorder is not recording.')
+                self.get_logger().warn('Pause request rejected: recorder is not recording.')
+                self.set_service_response(
+                    response,
+                    success=False,
+                    message='Recorder is not recording.'
+                )
                 return response
 
             if self.paused:
-                self.get_logger().warn('Pause request ignored: recorder is already paused.')
+                self.get_logger().warn('Pause request rejected: recorder is already paused.')
+                self.set_service_response(
+                    response,
+                    success=False,
+                    message='Recorder is already paused.'
+                )
                 return response
 
             self.paused = True
             self.get_logger().info('Recording paused.')
+            self.set_service_response(
+                response,
+                success=True,
+                message='Recording paused.'
+            )
 
             return response
 
     def resume_callback(self, request, response):
         with self.writer_lock:
             if not self.recording:
-                self.get_logger().warn('Resume request ignored: recorder is not recording.')
+                self.get_logger().warn('Resume request rejected: recorder is not recording.')
+                self.set_service_response(
+                    response,
+                    success=False,
+                    message='Recorder is not recording.'
+                )
                 return response
 
             if not self.paused:
-                self.get_logger().warn('Resume request ignored: recorder is not paused.')
+                self.get_logger().warn('Resume request rejected: recorder is not paused.')
+                self.set_service_response(
+                    response,
+                    success=False,
+                    message='Recorder is not paused.'
+                )
                 return response
 
             self.paused = False
             self.get_logger().info('Recording resumed.')
+            self.set_service_response(
+                response,
+                success=True,
+                message='Recording resumed.'
+            )
 
             return response
         

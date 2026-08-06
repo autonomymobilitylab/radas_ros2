@@ -12,40 +12,52 @@
 <body>
     <h1>Radas Web Interface</h1>
 
-    <button onclick="startCollecting()">
-        Start Collecting Data
-    </button>
+    <div class="recording-controls">
+        <button id="record-start" onclick="recordingAction('start')">
+            Start Recording
+        </button>
 
-    <button onclick="stopCollecting()">
-        Stop Collecting Data
-    </button>
+        <button id="record-pause" onclick="recordingAction('pause')">
+            Pause Recording
+        </button>
 
-    <h2>Data Collection Status</h2>
-    <div id="recording">
-        Data collection has not been started yet.
+        <button id="record-resume" onclick="recordingAction('resume')">
+            Resume Recording
+        </button>
+
+        <button id="record-stop" onclick="recordingAction('stop')">
+            Stop Recording
+        </button>
     </div>
-    <div id="status">
-        Ready
-    </div>
+
+    <h2>Recording Status</h2>
+    <div id="recording">Recorder is idle.</div>
+    <div id="status">Ready</div>
 
     <script>
-        async function startCollecting() {
-            const response = await fetch('/datacollection/start',
-                { method: 'POST' }
-            );
-
-            const data = await response.json();
-
-            document.getElementById('recording').innerText = data.message || "Data collection started.";
+        function updateRecordingButtons(state) {
+            document.getElementById('record-start').disabled = state !== 'idle';
+            document.getElementById('record-pause').disabled = state !== 'recording';
+            document.getElementById('record-resume').disabled = state !== 'paused';
+            document.getElementById('record-stop').disabled = state === 'idle';
         }
 
-        async function stopCollecting() {
-            const response = await fetch('/datacollection/stop',
-                { method: 'POST' }
-            );
-            const data = await response.json();
-            document.getElementById('recording').innerText = data.message || "Data collection stopped.";
+        async function recordingAction(action) {
+            const recordingEl = document.getElementById('recording');
+
+            try {
+                const response = await fetch(`/recording/${action}`, { method: 'POST' });
+                const data = await response.json();
+
+                recordingEl.innerText = data.message || `Recording ${action} request completed.`;
+                updateRecordingButtons(data.state || 'idle');
+            }
+            catch (error) {
+                recordingEl.innerText = `Recorder request failed: ${error}`;
+            }
         }
+
+        updateRecordingButtons('idle');
     </script>
 
     <script>
@@ -173,6 +185,8 @@
             if (data.recording_message) {
                 recordingEl.innerText = data.recording_message;
             }
+
+            updateRecordingButtons(data.recording_state || 'idle');
         }
 
         setInterval(updateDiagnostics, 1000);

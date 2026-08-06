@@ -12,6 +12,8 @@ import rclpy
 from rclpy.node import Node
 from std_srvs.srv import SetBool
 from diagnostic_msgs.msg import DiagnosticArray
+from pyftdi.gpio import GpioAsyncController
+from rosbag2_interfaces.srv import Pause, Resume, Record, Stop
 
 BASE_DIR = Path(__file__).parent
 app = FastAPI()
@@ -132,7 +134,8 @@ diagnostic_data = {
     "last_update": None,
     "start_time": None,
     "collection_enabled": "false",
-    "recording_message": "Data collection has not been started yet.",
+    "recording_state": "idle",
+    "recording_message": "Recorder is idle.",
     "gps": {
         "level": 3,
         "level_text": "WAITING",
@@ -183,6 +186,11 @@ class WebUINode(Node):
             SetBool,
             "/set_data_collection_enabled",
         )
+
+        self.record_client = self.create_client(Record, "/system_recorder/record")
+        self.stop_recording_client = self.create_client(Stop, "/system_recorder/stop")
+        self.pause_recording_client = self.create_client(Pause, "/system_recorder/pause")
+        self.resume_recording_client = self.create_client(Resume, "/system_recorder/resume")
 
         # Subscribe to the standard diagnostic_aggregator output.
         # Sensor nodes should publish raw diagnostic_msgs/DiagnosticArray on /diagnostics.
@@ -313,6 +321,69 @@ class WebUINode(Node):
         else:
             gpio.write(GREEN)
 
+    def call_recorder_service(self, client, request, unavailable_message: str):
+        if not client.wait_for_service(timeout_sec=0.5):
+            return {
+                "success": False,
+                "message": unavailable_message,
+            }
+
+        future = client.call_async(request)
+        timeout_time = time.time() + 3.0
+
+        while rclpy.ok() and not future.done():
+            if time.time() > timeout_time:
+                return {
+                    "success": False,
+                    "message": "Recorder service timed out",
+                }
+            time.sleep(0.01)
+
+        result = future.result()
+        if result is None:
+            return {
+                "success": False,
+                "message": "Recorder service did not respond",
+            }
+
+        success = getattr(result, "success", True)
+        message = getattr(result, "message", "")
+        return {
+            "success": bool(success),
+            "message": message,
+        }
+
+    def start_recording(self):
+        request = Record.Request()
+        if hasattr(request, "uri"):
+            request.uri = ""
+        return self.call_recorder_service(
+            self.record_client,
+            request,
+            "Recorder start service is not available",
+        )
+
+    def stop_recording(self):
+        return self.call_recorder_service(
+            self.stop_recording_client,
+            Stop.Request(),
+            "Recorder stop service is not available",
+        )
+
+    def pause_recording(self):
+        return self.call_recorder_service(
+            self.pause_recording_client,
+            Pause.Request(),
+            "Recorder pause service is not available",
+        )
+
+    def resume_recording(self):
+        return self.call_recorder_service(
+            self.resume_recording_client,
+            Resume.Request(),
+            "Recorder resume service is not available",
+        )
+
     def set_data_collection(self, enabled: bool):
         if not self.data_collection_client.wait_for_service(timeout_sec=0.5):
             return {
@@ -373,17 +444,45 @@ async def get_diagnostics():
     return diagnostic_data
 
 
-@app.post("/datacollection/start")
-async def start_data_collection():
-    diagnostic_data["collection_enabled"] = "true"
-    diagnostic_data["recording_message"] = "Data collection started."
-    gpio.write(0x01)  # AD0 high
-    return ros_node.set_data_collection(True)
+@app.post("/recording/start")
+async def start_recording():
+    result = ros_node.start_recording()
+    if result["success"]:
+        diagnostic_data["recording_state"] = "recording"
+        diagnostic_data["recording_message"] = "Recording started."
+    else:
+        diagnostic_data["recording_message"] = result["message"]
+    return {**result, "state": diagnostic_data["recording_state"]}
 
 
-@app.post("/datacollection/stop")
-async def stop_data_collection():
-    diagnostic_data["collection_enabled"] = "false"
-    diagnostic_data["recording_message"] = "Data collection stopped."
-    gpio.write(0x00)  # AD0 low
-    return ros_node.set_data_collection(False)
+@app.post("/recording/pause")
+async def pause_recording():
+    result = ros_node.pause_recording()
+    if result["success"]:
+        diagnostic_data["recording_state"] = "paused"
+        diagnostic_data["recording_message"] = "Recording paused."
+    else:
+        diagnostic_data["recording_message"] = result["message"]
+    return {**result, "state": diagnostic_data["recording_state"]}
+
+
+@app.post("/recording/resume")
+async def resume_recording():
+    result = ros_node.resume_recording()
+    if result["success"]:
+        diagnostic_data["recording_state"] = "recording"
+        diagnostic_data["recording_message"] = "Recording resumed."
+    else:
+        diagnostic_data["recording_message"] = result["message"]
+    return {**result, "state": diagnostic_data["recording_state"]}
+
+
+@app.post("/recording/stop")
+async def stop_recording():
+    result = ros_node.stop_recording()
+    if result["success"]:
+        diagnostic_data["recording_state"] = "idle"
+        diagnostic_data["recording_message"] = "Recording stopped."
+    else:
+        diagnostic_data["recording_message"] = result["message"]
+    return {**result, "state": diagnostic_data["recording_state"]}
