@@ -10,7 +10,7 @@ case $CALIB_TYPE in
         ros2 run multisensor_calibration extrinsic_lidar_lidar_calibration \
             --ros-args \
             -p robot_ws_path:="/calib_ws" \
-            -p target_config_file:="/ros2_ws/config/TargetWithCirclesAndAruco.yaml" \
+            -p target_config_file:="/ros2_ws/config/calibration/TargetWithCirclesAndAruco.yaml" \
             -p src_lidar_sensor_name:="jt128" \
             -p src_lidar_cloud_topic:="/lidar_points_jt" \
             -p ref_lidar_sensor_name:="xt32" \
@@ -78,7 +78,7 @@ case $CALIB_TYPE in
         ros2 run multisensor_calibration extrinsic_camera_lidar_calibration \
         --ros-args \
         -p robot_ws_path:="/calib_ws" \
-        -p target_config_file:="/ros2_ws/config/TargetWithCirclesAndAruco.yaml" \
+        -p target_config_file:="/ros2_ws/config/calibration/TargetWithCirclesAndAruco.yaml" \
         -p camera_sensor_name:="$CAMERA_ID" \
         -p camera_image_topic:="/$CAMERA_NAME/pylon_ros2_camera_node/image_rect" \
         -p camera_info_topic:="/$CAMERA_NAME/pylon_ros2_camera_node/camera_info" \
