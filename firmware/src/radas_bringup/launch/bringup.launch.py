@@ -169,7 +169,7 @@ def generate_launch_description():
             executable="jt_pointcloud_corrector",
             name="jt_pointcloud_corrector",
             output="screen",
-            parameters=["/ros2_ws/config/jt_calibration.yaml"],
+            parameters=["/ros2_ws/config/extrinsics/jt128/jt_calibration.yaml"],
             remappings=[
                 ("input", "/lidar_points_jt"),
             ],
