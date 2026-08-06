@@ -92,9 +92,6 @@ class HardwareTriggerConfigurator(Node):
         if not self._wait_for_ptp_slave(node_path, camera_name):
             return False
 
-        if not self._call_trigger(node_path, "start_grabbing"):
-            return False
-
         self.get_logger().info(
             f"{camera_name}: PTP Slave, timestamp chunks enabled, "
             "ROI=1920x1200, hardware trigger=Line1"
