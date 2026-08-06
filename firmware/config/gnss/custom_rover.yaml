@@ -1,6 +1,6 @@
 /Gnss/gnss_rover:
   ros__parameters:
-    device: "serial:/dev/gps-out"
+    device: "serial:/dev/gps-control"
 
     serial:
       baudrate: 921600
