@@ -4,6 +4,7 @@ from typing import Iterable, Type
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 from std_srvs.srv import SetBool, Trigger
 from pylon_ros2_camera_interfaces.srv import (
     GetPtpStatus,
@@ -29,22 +30,39 @@ ROI_HEIGHT = 1200
 ROI_DO_RECTIFY = False
 
 SERVICE_WAIT_TIMEOUT_SEC = 10.0
+DRIVER_READY_TIMEOUT_SEC = 60.0
+DRIVER_READY_RETRY_INTERVAL_SEC = 1.0
+STOP_SETTLE_SEC = 1.0
+PTP_DISABLE_SETTLE_SEC = 0.5
+WRITE_RETRY_COUNT = 3
 
 
 class HardwareTriggerConfigurator(Node):
     def __init__(self) -> None:
         super().__init__("basler_hardware_trigger_configurator")
 
-        self.declare_parameter("use_sim_time", False)
-        if bool(self.get_parameter("use_sim_time").value):
-            raise RuntimeError("use_sim_time must remain false for this PTP setup")
+        results = self.set_parameters([Parameter("use_sim_time", Parameter.Type.BOOL, False)])
+        if not results or not results[0].successful:
+            reason = results[0].reason if results else "no parameter result"
+            raise RuntimeError(f"Failed to set use_sim_time=false: {reason}")
 
     def configure_camera(self, camera_name: str) -> bool:
         node_path = f"/{camera_name}/pylon_ros2_camera_node"
         self.get_logger().info(f"Configuring {camera_name} at {node_path}")
 
+        if not self._stop_grabbing_when_ready(node_path, camera_name):
+            return False
+
+        time.sleep(STOP_SETTLE_SEC)
         if not self._call_trigger(node_path, "stop_grabbing"):
             return False
+
+        if not self._set_bool(node_path, "enable_ptp", False):
+            self.get_logger().error(
+                f"{camera_name}: failed to disable PTP before configuration"
+            )
+            return False
+        time.sleep(PTP_DISABLE_SETTLE_SEC)
 
         configuration_ok = all(
             (
@@ -54,7 +72,6 @@ class HardwareTriggerConfigurator(Node):
                 self._set_integer(node_path, "set_ptp_network_mode", PTP_NETWORK_MODE),
                 self._set_bool(node_path, "enable_two_step_operation", False),
                 self._set_bool(node_path, "enable_ptp", True),
-                self._set_roi(node_path),
                 self._set_bool(node_path, "set_chunk_mode_active", True),
                 self._set_integer(
                     node_path, "set_chunk_selector", CHUNK_SELECTOR_TIMESTAMP
@@ -64,6 +81,7 @@ class HardwareTriggerConfigurator(Node):
                     node_path, "set_trigger_source", TRIGGER_SOURCE_LINE_1
                 ),
                 self._set_bool(node_path, "set_trigger_mode", True),
+                self._set_roi(node_path),
             )
         )
 
@@ -82,6 +100,63 @@ class HardwareTriggerConfigurator(Node):
             "ROI=1920x1200, hardware trigger=Line1"
         )
         return True
+
+    def _stop_grabbing_when_ready(self, node_path: str, camera_name: str) -> bool:
+        """Retry stop_grabbing until camera discovery has completed."""
+        service_name = f"{node_path}/stop_grabbing"
+        client = self.create_client(Trigger, service_name)
+        deadline = time.monotonic() + DRIVER_READY_TIMEOUT_SEC
+        attempt = 0
+
+        self.get_logger().info(
+            f"{camera_name}: waiting for camera discovery before stopping acquisition"
+        )
+
+        try:
+            while rclpy.ok() and time.monotonic() < deadline:
+                attempt += 1
+                remaining = max(0.0, deadline - time.monotonic())
+                wait_time = min(DRIVER_READY_RETRY_INTERVAL_SEC, remaining)
+
+                if not client.wait_for_service(timeout_sec=wait_time):
+                    self.get_logger().info(
+                        f"{camera_name}: stop_grabbing service not available yet "
+                        f"(attempt {attempt})"
+                    )
+                    continue
+
+                future = client.call_async(Trigger.Request())
+                rclpy.spin_until_future_complete(
+                    self, future, timeout_sec=SERVICE_WAIT_TIMEOUT_SEC
+                )
+
+                if future.done() and self._call_succeeded(
+                    future, service_name, log_errors=False
+                ):
+                    self.get_logger().info(
+                        f"{camera_name}: camera discovered; acquisition stopped"
+                    )
+                    return True
+
+                reason = "driver has not initialized the camera yet"
+                if future.done() and future.exception() is None:
+                    response = future.result()
+                    if response is not None:
+                        reason = getattr(response, "message", reason) or reason
+
+                self.get_logger().info(
+                    f"{camera_name}: stop_grabbing not accepted yet "
+                    f"(attempt {attempt}: {reason}); retrying"
+                )
+                time.sleep(DRIVER_READY_RETRY_INTERVAL_SEC)
+        finally:
+            self.destroy_client(client)
+
+        self.get_logger().error(
+            f"{camera_name}: stop_grabbing was not accepted within "
+            f"{DRIVER_READY_TIMEOUT_SEC:.1f}s"
+        )
+        return False
 
     def _set_bool(self, node_path: str, service: str, value: bool) -> bool:
         request = SetBool.Request()
@@ -175,42 +250,110 @@ class HardwareTriggerConfigurator(Node):
         return False
 
     def _call_service(self, srv_type: Type, service_name: str, request) -> bool:
-        client = self.create_client(srv_type, service_name)
-        try:
-            self.get_logger().info(f"Calling {service_name}")
-            if not client.wait_for_service(timeout_sec=SERVICE_WAIT_TIMEOUT_SEC):
-                self.get_logger().error(f"Service unavailable: {service_name}")
-                return False
+        node_path = service_name.rsplit("/", 1)[0]
 
-            future = client.call_async(request)
-            rclpy.spin_until_future_complete(
-                self, future, timeout_sec=SERVICE_WAIT_TIMEOUT_SEC
-            )
+        for attempt in range(1, WRITE_RETRY_COUNT + 1):
+            client = self.create_client(srv_type, service_name)
+            try:
+                self.get_logger().info(
+                    f"Calling {service_name} (attempt {attempt}/{WRITE_RETRY_COUNT})"
+                )
+                if not client.wait_for_service(timeout_sec=SERVICE_WAIT_TIMEOUT_SEC):
+                    self.get_logger().error(f"Service unavailable: {service_name}")
+                    return False
 
-            if not future.done():
-                self.get_logger().error(f"Service timed out: {service_name}")
-                return False
+                future = client.call_async(request)
+                rclpy.spin_until_future_complete(
+                    self, future, timeout_sec=SERVICE_WAIT_TIMEOUT_SEC
+                )
 
-            return self._call_succeeded(future, service_name)
-        finally:
-            self.destroy_client(client)
+                if not future.done():
+                    self.get_logger().error(f"Service timed out: {service_name}")
+                    return False
 
-    def _call_succeeded(self, future, service_name: str) -> bool:
+                if future.exception() is not None:
+                    self.get_logger().error(
+                        f"Service call failed for {service_name}: {future.exception()}"
+                    )
+                    return False
+
+                response = future.result()
+                if response is None:
+                    self.get_logger().error(
+                        f"Service call returned no response: {service_name}"
+                    )
+                    return False
+
+                if not hasattr(response, "success") or response.success:
+                    return True
+
+                message = str(getattr(response, "message", ""))
+                retryable = (
+                    "node is not writable" in message.lower()
+                    or "requires stopping image grabbing" in message.lower()
+                )
+                if not retryable or attempt == WRITE_RETRY_COUNT:
+                    self.get_logger().error(
+                        f"Service rejected request for {service_name}: {message}"
+                    )
+                    return False
+
+                self.get_logger().warning(
+                    f"{service_name} rejected while acquisition is active: {message}. "
+                    "Stopping acquisition and retrying."
+                )
+            finally:
+                self.destroy_client(client)
+
+            # Do not recurse through _call_service for stop_grabbing.
+            stop_name = f"{node_path}/stop_grabbing"
+            stop_client = self.create_client(Trigger, stop_name)
+            try:
+                if not stop_client.wait_for_service(
+                    timeout_sec=SERVICE_WAIT_TIMEOUT_SEC
+                ):
+                    self.get_logger().error(f"Service unavailable: {stop_name}")
+                    return False
+                stop_future = stop_client.call_async(Trigger.Request())
+                rclpy.spin_until_future_complete(
+                    self, stop_future, timeout_sec=SERVICE_WAIT_TIMEOUT_SEC
+                )
+                if not stop_future.done() or not self._call_succeeded(
+                    stop_future, stop_name
+                ):
+                    return False
+            finally:
+                self.destroy_client(stop_client)
+
+            time.sleep(0.2)
+
+        return False
+
+    def _call_succeeded(
+        self, future, service_name: str, *, log_errors: bool = True
+    ) -> bool:
         exception = future.exception()
         if exception is not None:
-            self.get_logger().error(f"Service call failed for {service_name}: {exception}")
+            if log_errors:
+                self.get_logger().error(
+                    f"Service call failed for {service_name}: {exception}"
+                )
             return False
 
         response = future.result()
         if response is None:
-            self.get_logger().error(f"Service call returned no response: {service_name}")
+            if log_errors:
+                self.get_logger().error(
+                    f"Service call returned no response: {service_name}"
+                )
             return False
 
         if hasattr(response, "success") and not response.success:
-            message = getattr(response, "message", "")
-            self.get_logger().error(
-                f"Service rejected request for {service_name}: {message}"
-            )
+            if log_errors:
+                message = getattr(response, "message", "")
+                self.get_logger().error(
+                    f"Service rejected request for {service_name}: {message}"
+                )
             return False
 
         return True
