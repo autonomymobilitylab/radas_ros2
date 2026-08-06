@@ -3,7 +3,7 @@ from launch_ros.actions import Node
 from launch.actions import ExecuteProcess
 
 def generate_launch_description():
-    rviz_config='/ros2_ws/config/rviz2.rviz'
+    rviz_config='/ros2_ws/config/rviz/rviz2.rviz'
     return LaunchDescription([
         Node(
             package='tf2_ros',

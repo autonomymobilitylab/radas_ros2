@@ -2,7 +2,7 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 
 def generate_launch_description():
-    rviz_config='/ros2_ws/config/rviz2.rviz'
+    rviz_config='/ros2_ws/config/rviz/rviz2.rviz'
     yaml_config_xt='/ros2_ws/config/config_xt.yaml'
     yaml_config_jt='/ros2_ws/config/config_jt.yaml'
     return LaunchDescription([
