@@ -78,7 +78,7 @@ def generate_launch_description():
         output="screen",
     )
     system_recorder = ExecuteProcess(
-        cmd=['python3', '/ros2_ws/src/testing/bag_system.py'],
+        cmd=['python3', '/ros2_ws/src/bag_manager/bag_manager.py'],
         output='screen'
     )
 
