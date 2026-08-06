@@ -139,11 +139,7 @@ def generate_launch_description():
             output="screen",
             parameters=[
                 {
-                    "config_path": os.path.join(
-                        get_package_share_directory("radas_bringup"),
-                        "config",
-                        "xt32.yaml",
-                    )
+                    "config_path": "/ros2_ws/config/lidars/xt32.yaml"
                 }
             ],
         ),
@@ -155,11 +151,7 @@ def generate_launch_description():
             output="screen",
             parameters=[
                 {
-                    "config_path": os.path.join(
-                        get_package_share_directory("radas_bringup"),
-                        "config",
-                        "jt128.yaml",
-                    )
+                    "config_path": "/ros2_ws/config/lidars/jt128.yaml"
                 }
             ],
         ),
