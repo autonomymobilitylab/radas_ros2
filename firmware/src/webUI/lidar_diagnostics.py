@@ -5,7 +5,6 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import PointCloud2
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
-from hesai_ros_driver.msg import LossPacket
 
 
 class LidarDiagnostics(Node):
@@ -22,16 +21,6 @@ class LidarDiagnostics(Node):
             "Lidar/Lidar 2": deque(),
         }
 
-        self.packet_loss = {
-            "Lidar/Lidar 1": None,
-            "Lidar/Lidar 2": None,
-        }
-
-        self.packet_loss_total = {
-            "Lidar/Lidar 1": None,
-            "Lidar/Lidar 2": None,
-        }
-
         self.create_subscription(
             PointCloud2,
             "/lidar_points_xt",
@@ -43,20 +32,6 @@ class LidarDiagnostics(Node):
             PointCloud2,
             "/lidar_points_jt",
             lambda msg: self.point_cb("Lidar/Lidar 2"),
-            10,
-        )
-
-        self.create_subscription(
-            LossPacket,
-            "/lidar_packets_loss_xt",
-            lambda msg: self.packet_loss_cb("Lidar/Lidar 1", msg),
-            10,
-        )
-
-        self.create_subscription(
-            LossPacket,
-            "/lidar_packets_loss_jt",
-            lambda msg: self.packet_loss_cb("Lidar/Lidar 2", msg),
             10,
         )
 
@@ -87,17 +62,6 @@ class LidarDiagnostics(Node):
 
         return (len(times) - 1) / elapsed
 
-    def packet_loss_cb(self, name, msg):
-        total = msg.total_packet_count
-        lost = msg.total_packet_loss_count
-
-        self.packet_loss_total[name] = lost
-
-        if total <= 0:
-            self.packet_loss[name] = 0.0
-        else:
-            self.packet_loss[name] = lost / total
-
     def publish_diagnostics(self):
         now = time.monotonic()
         msg = DiagnosticArray()
@@ -120,40 +84,14 @@ class LidarDiagnostics(Node):
                 level = DiagnosticStatus.OK
                 text = "OK"
 
-            packet_loss = self.packet_loss[name]
-            packet_loss_total = self.packet_loss_total[name]
-
-            if packet_loss is not None:
-                if packet_loss > 0.20:
-                    level = max(level, DiagnosticStatus.ERROR)
-                    text = "High packet loss"
-                elif packet_loss > 0.05:
-                    level = max(level, DiagnosticStatus.WARN)
-                    text = "Packet loss"
-
             status = DiagnosticStatus()
             status.name = name
             status.level = level
             status.message = text
             status.hardware_id = name
-            values = [
+            status.values = [
                 KeyValue(key="hz", value=f"{hz:.1f}"),
             ]
-
-            if packet_loss is not None:
-                values.append(
-                    KeyValue(key="packet_loss", value=f"{packet_loss * 100:.2f}%")
-                )
-
-            if packet_loss_total is not None:
-                values.append(
-                    KeyValue(
-                        key="packet_loss_count",
-                        value=str(packet_loss_total),
-                    )
-                )
-
-            status.values = values
 
             msg.status.append(status)
 

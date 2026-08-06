@@ -273,7 +273,6 @@ class WebUINode(Node):
             if sensor_type is None or hz is None:
                 continue
 
-            packet_loss = values.get("packet_loss") or values.get("packet_loss_count")
             sensor_name = get_sensor_display_name(
                 status.name,
                 sensor_type,
@@ -301,7 +300,6 @@ class WebUINode(Node):
                     "message": status.message,
                     "hz": hz,
                     "expected_hz": expected_hz,
-                    "packet_loss": packet_loss,
                     "values": values,
                 }
             )
