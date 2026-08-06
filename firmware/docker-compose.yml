@@ -10,7 +10,9 @@ services:
       - NET_RAW
       - SYS_TIME
     devices:
+      - /dev/ptp2:/dev/ptp1
       - /dev/ptp2:/dev/ptp2
+      - /dev/ptp2:/dev/ptp3
     environment:
       PTP_INTERFACE: "${PTP_INTERFACE:?PTP_INTERFACE is missing from .env}"
     volumes:
