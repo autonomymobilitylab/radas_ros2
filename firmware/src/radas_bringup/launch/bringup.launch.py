@@ -91,7 +91,7 @@ def generate_launch_description():
             output="screen",
             emulate_tty=True,
             parameters=[
-                "/ros2_ws/config/basler_left.yaml",
+                "/ros2_ws/config/cameras/basler_left.yaml",
                 {
                     "startup_user_set": "UserSet1",
                     "enable_status_publisher": False,
@@ -107,7 +107,7 @@ def generate_launch_description():
             output="screen",
             emulate_tty=True,
             parameters=[
-                "/ros2_ws/config/basler_middle.yaml",
+                "/ros2_ws/config/cameras/basler_middle.yaml",
                 {
                     "startup_user_set": "UserSet1",
                     "enable_status_publisher": False,
@@ -123,7 +123,7 @@ def generate_launch_description():
             output="screen",
             emulate_tty=True,
             parameters=[
-                "/ros2_ws/config/basler_right.yaml",
+                "/ros2_ws/config/cameras/basler_right.yaml",
                 {
                     "startup_user_set": "UserSet1",
                     "enable_status_publisher": True,
