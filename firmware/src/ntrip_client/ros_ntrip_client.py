@@ -23,7 +23,7 @@ class RosNtripClient(Node):
         self.declare_parameter("port", 2101)
         self.declare_parameter("mountpoint", "VRS-FKP")
         self.declare_parameter("navsatfix_topic", "/Gnss/navsatfix")
-        self.declare_parameter("serial_port", "/dev/ttyACM0")
+        self.declare_parameter("serial_port", "/dev/gps-in")
         self.declare_parameter("serial_baudrate", 115200)
         self.declare_parameter("gga_interval", 5.0)
         self.declare_parameter("reconnect_delay", 5.0)
