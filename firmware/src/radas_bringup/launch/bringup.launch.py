@@ -192,7 +192,7 @@ def generate_launch_description():
             name='xsens_mti_node',
             namespace="Imu",
             output='screen',
-            parameters=["/ros2_ws/config/xsens_param.yaml"],
+            parameters=["/ros2_ws/config/imu/xsens_param.yaml"],
         ),
         web_ui,
         lidar_status,
