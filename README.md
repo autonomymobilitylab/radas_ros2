@@ -300,17 +300,58 @@ This guide contains information about many of the tools and procedures used duri
     `month, day, hour, minute, second`
  5. The final four bytes represent the microsecond component of the UTC timestamp.
 
+ ### **SSH Access to the NUC**
 
- ### **SSH access to NUC**
- The MS-01 NUC is set to accept SSH traffic on the default port. Connection details can be found physically on the machine. If a display is required, add the `-X` flag before `username@ip`. Won't go into details how this is setup but it's just a ssh server setup.
+ The MS-01 NUC is configured to accept SSH connections on the default SSH port. The connection details can be found physically on the machine.
 
- For ease of development, local changes can be pushed to the NUC using `./firmware/sync_to_nuc.sh`. This allows changes made on the local system to be pushed to the NUC without going through GitHub.
- 
- This script should only be used during development and for quick tests. **Working, finalized code should always be manually committed and pulled to the NUC.** Before pulling on the NUC, run `git restore .` to revert to the latest published version.
+ To connect to the NUC, use:
 
- ### **Basler cameras**
- Pylonviewer works like normal inside the container. For ros2 handling of the basler cameras one can use `ros2 launch pylon_ros2_camera_wrapper pylon_ros2_camera.launch.py camera_id:="Basler_{pos}" config_file:="/ros2_ws/config/basler_{pos}.yaml"` although this doesn't do much as a standalone node setup.
- 
+ ```shell
+ ssh username@ip
+ ```
+
+ If X11 forwarding is required for graphical applications, add the `-X` option:
+
+ ```shell
+ ssh -X username@ip
+ ```
+
+ This guide does not cover the SSH server configuration itself, as the NUC uses a standard SSH server setup.
+
+ #### **Syncing Local Changes During Development**
+
+ For easier development, local changes can be pushed directly to the NUC using:
+
+ ```shell
+ ./firmware/sync_to_nuc.sh
+ ```
+
+ This allows changes made on the local development machine to be transferred to the NUC without first committing and pushing them through GitHub.
+
+ This script should only be used during development and for quick testing. **Working, finalized code should always be committed to Git and pulled onto the NUC through the normal Git workflow.**
+
+ Before pulling the finalized version on the NUC, discard changes previously transferred using the sync script:
+
+ ```shell
+ git restore .
+ ```
+
+ > **Warning:** `git restore .` discards uncommitted changes to tracked files. Make sure there are no changes on the NUC that need to be preserved before running this command.
+
+ ### **Basler Cameras**
+
+ Pylon Viewer can be used normally from inside the Docker container.
+
+ For ROS 2 access to an individual Basler camera, the `pylon_ros2_camera_wrapper` package can be launched manually with:
+
+ ```shell
+ ros2 launch pylon_ros2_camera_wrapper pylon_ros2_camera.launch.py camera_id:="Basler_{pos}" config_file:="/ros2_ws/config/basler_{pos}.yaml"
+ ```
+
+ Replace `{pos}` with the position identifier of the camera.
+
+ Running the camera wrapper this way is mainly useful for validating the broad functionality of the cameras inside ROS 2 and the container, as the standalone node does not provide much functionality by itself compared with the complete RADAS setup.
+
  ### **Running RADAS automatically on startup with systemd**
  The ROS 2 Docker stack can be started automatically on boot using the `systemd` service.
  
