@@ -6,7 +6,12 @@
 
 # Overview
 
-The Rugged ATV Data Acquisition System, or RADAS, is a versatile, rugged sensor rack for ATVs.  
+The Rugged ATV Data Acquisition System, or RADAS, is a versatile, rugged sensor rack designed to be mounted on the front cargo area of an ATV. With its modular design and small footprint, the system can also be mounted on other vehicles and platforms.
+
+The purpose of this system is to collect real-world data for state-of-the-art (SOTA) datasets in unstructured off-road environments, such as forests and other urban areas in Finland.
+
+The system includes two different LiDAR sensors, three RGB cameras that provide a 170° field of view, a 9-DoF IMU, and an RTK-capable GNSS receiver. The system is also planned to be upgraded with an additional NIR (near-infrared) camera in the future.
+The sensors and their specifications are listed in more detail in the table below.
 
 ### **Sensors**
  - 32-channel 360° LIDAR: [Hesai XT32M2X](https://www.hesaitech.com/product/xt16-32-32m/)
