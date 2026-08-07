@@ -414,26 +414,143 @@ This guide contains information about many of the tools and procedures used duri
  sudo rm /etc/systemd/system/radas_ros2.service
  sudo systemctl daemon-reload
  ```
- 
-### **STATUS PAGE**
 
- The status page provides a web interface for controlling data collection and monitoring sensor health. Sensor health is read through the standard ROS 2 diagnostics pipeline:
+ ### **Status Page**
+
+ The RADAS status page provides a web interface for monitoring sensor health, GNSS status, and controlling data recording.
+
+ The page is normally started automatically as part of the RADAS Docker stack and can be accessed at:
+
+ ```text
+ http://localhost:8080
+ ```
+
+ or remotely from the RADAS network at:
+
+ ```text
+ http://192.168.1.2:8080
+ ```
+
+ #### **Diagnostics**
+
+ Sensor health information is collected using the standard ROS 2 diagnostics pipeline:
 
 ```text
-sensor diagnostic publishers -> /diagnostics -> diagnostic_aggregator -> /diagnostics_agg -> web UI
+Sensor data / driver diagnostics
+            |
+            v
+Sensor diagnostic nodes
+            |
+            v
+      /diagnostics
+            |
+            v
+ diagnostic_aggregator
+            |
+            v
+    /diagnostics_agg
+            |
+            v
+       RADAS Web UI
 ```
 
- The page shows a traffic-light sensor summary. The traffic-light table displays:
+ Dedicated diagnostic nodes are used to normalize the status of the different sensor types before the information is passed to the diagnostic aggregator.
 
-- Sensor status: green/yellow/red/black indicator
-- Sensor name
-- Final health level
-- Measured Hz compared against the expected Hz for that sensor type
-- PTP status for cameras and lidars, when exposed by diagnostics
+ The main sensor status table displays:
 
- The final health level is based on the worse result between the ROS diagnostic level and the manual Hz check. IMU and GNSS do not use the PTP column.
+ - Traffic-light status indicator
+ - Sensor name
+ - Health level
+ - Measured publishing frequency and expected frequency
+ - Additional diagnostic details
 
- The web page can be ran manually with:
+ The traffic-light indicators represent:
+
+ - 🟢 **Good**
+ - 🟡 **Warning**
+ - 🔴 **Error**
+ - ⚫ **Stale / no current data**
+
+ The expected sensor frequencies used by the status page are:
+
+ ```text
+ LiDAR:   10 Hz
+ Camera:  10 Hz
+ IMU:   1000 Hz
+ GNSS:    10 Hz
+ ```
+
+ For sensors with frequency information available, the web UI performs an additional check against the expected frequency:
+
+ - **≥ 90%** of expected frequency: Good
+ - **70–90%** of expected frequency: Warning
+ - **≤ 70%** of expected frequency: Error
+
+ The displayed health level is the more severe result of the diagnostic node's reported status and this frequency check.
+
+ #### **Sensor Diagnostics**
+
+ The cameras, LiDARs, IMU, and GNSS use separate diagnostic nodes.
+
+ The **camera diagnostics** monitor the image streams of all three Basler cameras and combine their measured frame rate with the availability diagnostics produced by the Basler driver.
+
+ The **LiDAR diagnostics** monitor the point cloud topics of both Hesai LiDARs and report their publishing frequency and stream status.
+
+ The **IMU diagnostics** monitor the XSens IMU data stream and its publishing frequency.
+
+ The **GNSS diagnostics** monitor the Septentrio GNSS receiver separately and provide more detailed positioning information to the web interface.
+
+ #### **GNSS Status**
+
+ GNSS information is displayed in a dedicated table containing:
+
+ - Overall GNSS status
+ - Positioning mode/status
+ - Satellites used and visible
+ - Latitude and longitude
+ - Altitude
+ - HDOP and PDOP
+ - RF interference status
+ - Spoofing status
+
+ The GNSS diagnostic status also takes the positioning mode and availability of the required GNSS data streams into account. Detected interference or spoofing causes the GNSS diagnostic state to report an error.
+
+ #### **System Status Indicator**
+
+ In addition to the web interface, RADAS uses a physical status light connected through an FTDI GPIO interface.
+
+ The light represents the overall diagnostic state of the system:
+
+ - 🟢 **Green:** System OK
+ - 🟡 **Yellow:** Warning
+ - 🔴 **Red:** Error
+ - 🔵 **Blue:** Diagnostics stale or unavailable
+
+ The overall state is determined from the sensor and GNSS diagnostic states.
+
+ #### **Recording Controls**
+
+ The status page provides four controls for the ROS 2 system recorder:
+
+ - **Start Recording**
+ - **Pause Recording**
+ - **Resume Recording**
+ - **Stop Recording**
+
+ These buttons communicate with the following ROS 2 services:
+
+ ```text
+ /system_recorder/record
+ /system_recorder/pause
+ /system_recorder/resume
+ /system_recorder/stop
+ ```
+
+ The page also displays the current recording state and reports if a recorder request fails or the required ROS 2 service is unavailable.
+
+ #### **Running the Status Page Manually**
+
+ For development and testing, the web interface can be started manually.
 
  1. Create and activate a Python virtual environment:
 
@@ -442,13 +559,20 @@ sensor diagnostic publishers -> /diagnostics -> diagnostic_aggregator -> /diagno
  source .venv/bin/activate
  ```
 
- 2. Install dependencies:
+ 2. Install the required dependencies:
 
  ```shell
  pip install -r src/requirements.txt
  ```
 
- 3. Start the ROS 2 diagnostic aggregator:
+ 3. Make sure the ROS 2 environment and RADAS workspace are sourced:
+
+ ```shell
+ source /opt/ros/$ROS_DISTRO/setup.bash
+ source install/setup.bash
+ ```
+
+ 4. Start the diagnostic aggregator:
 
  ```shell
  ros2 run diagnostic_aggregator aggregator_node \
@@ -456,63 +580,55 @@ sensor diagnostic publishers -> /diagnostics -> diagnostic_aggregator -> /diagno
    --params-file diagnostic_aggregator.yaml
  ```
 
- The aggregator config should use `analyzers` as the top-level node name and publish aggregated diagnostics on `/diagnostics_agg`. The web UI subscribes to `/diagnostics_agg`; individual sensor nodes should publish raw diagnostics to `/diagnostics` (if implemented in the driver).
-
- 4. Launch the web server from a ROS-sourced terminal:
+ 5. Start the web server from another ROS-sourced terminal:
 
  ```shell
- source /opt/ros/$ROS_DISTRO/setup.bash
- source install/setup.bash
  python3 -m uvicorn src.webUI.app:app --host 0.0.0.0 --port 8080
  ```
 
- 5. Allow the port on the firewall if accessing remotely:
+ 6. If accessing the web interface remotely, make sure TCP port `8080` is allowed through the firewall:
 
  ```shell
  sudo iptables -I INPUT 5 -p tcp --dport 8080 -j ACCEPT
  ```
 
- 6. Open a browser and navigate to:
+ 7. Open the web interface:
 
  ```text
  http://localhost:8080
  ```
 
- or replace `localhost` with the host machine's IP address if accessing remotely.
+ or, when accessing the NUC remotely:
 
- 7. Use the **Start Collecting Data** and **Stop Collecting Data** buttons to control data collection.
+ ```text
+ http://192.168.1.2:8080
+ ```
 
- > **Note:** These buttons call the ROS 2 service `/set_data_collection_enabled`. The service must be running before the web interface can control data collection.
+ #### **Troubleshooting**
 
- 8. Verify that the diagnostics pipeline is running:
+ Check that raw diagnostics are being published:
 
  ```shell
  ros2 topic echo /diagnostics --once
+ ```
+
+ Check the output of the diagnostic aggregator:
+
+ ```shell
  ros2 topic echo /diagnostics_agg --once
+ ```
+
+ The data currently received by the web UI can also be inspected directly:
+
+ ```shell
  curl http://localhost:8080/diagnostics
  ```
 
- Useful troubleshooting commands include:
+ Other useful commands include:
 
  ```shell
  ros2 node list
  ros2 topic list
  ros2 topic hz <topic_name>
- ros2 service list | grep set_data_collection_enabled
+ ros2 service list
  ```
-
- Expected ROS nodes during testing include:
-
- ```text
- /diagnostic_test_publisher
- /analyzers
- /web_ui_node
- ```
-
- Fake diagnostic data can be sent for testing by running the web UI test publisher:
-
- ```shell
- python3 src/webUI/webUI_test.py
- ```
-
- The test publisher sends sample diagnostics to `/diagnostics`; the diagnostic aggregator converts them to `/diagnostics_agg`, which the web UI reads.
