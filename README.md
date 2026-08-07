@@ -154,42 +154,58 @@ This guide contains information about many of the tools and procedures used duri
 
  This launches the main RADAS ROS 2 bringup package.
 
- ### **LIDARs** 
+ ### **LiDARs**
 
- **PandarView2:**
+ #### **PandarView2**
 
- 1. Make sure device firewalls are turned off, or that LIDAR UDP-port (typically 2368) is allowed:
+ 1. Make sure the device firewall is disabled or that the LiDAR UDP port (typically `2368`) is allowed through the firewall:
 
-  ```shell
-  sudo ufw disable
-  sudo iptables -F
-  ```
+ ```shell
+ sudo ufw disable
+ sudo iptables -F
+ ```
 
-  > **Note:** Disconnecting and reconnecting the lidar will result in the firewall "resetting", after which you have to allow the port through again. 
+ > **Note:** Disconnecting and reconnecting the LiDAR may result in the firewall rules being reset, after which the port must be allowed through again.
 
- 2. Check for wired IP-address:
+ 2. Check the IP address of the wired network interface:
 
-  ```shell
-  ip -br addr
-  ```
+ ```shell
+ ip -br addr
+ ```
 
-  > **Note:** For troubleshooting/sanity-checking: you can check that the connected LIDAR is actually sending data to the port with ```sudo tcpdump -i <device_name> -n udp port 2368``` or just use Wireshark
+ > **Note:** For troubleshooting or sanity-checking, you can verify that the connected LiDAR is sending UDP data using:
+ >
+ > `sudo tcpdump -i <NIC_device_name> -n udp port 2368`
+ >
+ > Alternatively, use Wireshark to inspect the network traffic.
 
- 3. Hesai default IP-address is ```192.168.1.201``` which when connected to through a browser let's you control the LIDAR's parameters (for models that support WEB UI). Models that don't support this (such as JT128) need Hesai's LidarUtilities-software to control and change parameters. 
+ 3. The default IP address of Hesai LiDARs is `192.168.1.201`. For models that support a web interface, navigate to this address in a browser to view and configure the LiDAR parameters.
 
- 4. Launch PandarView2 and choose "Listen for Data" (or Ctrl + R). Host IP can either be "any" or set it to your wired connection's address. 
+    Models that do not support the web interface, such as the JT128, require Hesai's LidarUtilities software to view and modify their parameters.
 
- 5. Once running, import the angle correction file. 
+ 4. Launch PandarView2 and select `Listen for Data` (or press `Ctrl+R`). The host IP can either be set to `Any` or to the IP address of the wired network interface connected to the LiDAR.
 
-**Ros2 and Rviz2**
+ 5. Once data is being received, import the corresponding angle correction file.
 
-Same network setup as PandarView2-section. 
+ #### **ROS 2 and RViz2**
 
-This guide won't go over creating the workspace, cloning manufacturer drivers/SDK or installing ROS package dependencies. Instead it will go over the most important config files changes for the LIDARs:
+ Use the same network configuration described in the PandarView2 section above.
 
- 1. Set IP-addresses. Device IP-address as your configured address, host address as your wired connection address and replace multicast address with just "". All addresses should be written in the form ```"192.168.1.xxx"``` , and as strings. 
+ This guide does not cover creating the workspace, cloning the manufacturer's drivers/SDK, or installing ROS 2 package dependencies. Instead, it covers the most important configuration file changes required for the LiDARs.
 
- 2. Clear these placeholder paths:
+ 1. Configure the IP addresses in the LiDAR configuration file:
+
+    - Set the **device IP address** to the address configured on the LiDAR.
+    - Set the **host IP address** to the address of the wired network interface connected to the LiDAR.
+    - Replace the **multicast IP address** with an empty string (`""`).
+
+    All IP addresses should be specified as strings in the following format:
+
+    ```text
+    "192.168.1.xxx"
+    ```
+
+ 2. Clear the following placeholder paths:
 
  ```yaml
  firetimes_path: ""
@@ -198,52 +214,56 @@ This guide won't go over creating the workspace, cloning manufacturer drivers/SD
  multi_fov_filter_ranges: ""
  ```
 
- 3. Download corresponding device correction files and set their filepaths, for example:
+ 3. Download the appropriate correction file for the LiDAR and configure its path. For example:
 
  ```yaml
- correction_file_path: "/home/user/hesai_ws/config/jt128_correction.csv" 
+ correction_file_path: "/home/user/hesai_ws/config/jt128_correction.csv"
  ```
 
- 4. Make sure that the point cloud is actually sent through ros
+ 4. Make sure the required data is published through ROS 2:
 
  ```yaml
  ros:
-    ros_frame_id: hesai_lidar 
+    ros_frame_id: hesai_lidar
     ***
-    send_packet_ros: true                               
-    send_point_cloud_ros: true                           
-    send_imu_ros: true   
+    send_packet_ros: true
+    send_point_cloud_ros: true
+    send_imu_ros: true
  ```
 
- 5. Check if your frame frequency is set to 0. If it is, change it to a suitable value:
+ 5. Check the configured frame frequency. If it is set to `0`, change it to an appropriate value. For example:
 
  ```yaml
- frame_frequency: 10                   
+ frame_frequency: 10
  default_frame_frequency: 10.0
  ```
- 6. Launch the node and run Rviz2. Useful troubleshooting checks include:
+
+ 6. Launch the LiDAR node and RViz2. To verify that the ROS 2 topics are available, run:
 
  ```shell
  ros2 topic list
  ```
 
- You should see topics such as ```/lidar_points```. Check for topic info and hz:
+ You should see LiDAR-related topics such as `/lidar_points`.
+
+ Check the topic information and publishing frequency with:
 
  ```shell
  ros2 topic info /lidar_points
  ros2 topic hz /lidar_points
  ```
 
- ```ros2 topic info /lidar_points``` should return 
+ `ros2 topic info /lidar_points` should return something similar to:
 
- ```shell
+ ```text
  Type: sensor_msgs/msg/PointCloud2
  Publisher count: 1
- Subscription count: 1
+ Subscription count: 0
  ```
 
- If hz doesn't return anything, ros is not actually receiving the lidar datastream. 
-> **Note:** ros2 topic hz takes a few moments to calculate the frequency of data, don't expect instantaneous result. For high data size and frequency the actual Hz value might be wrong, you just want to see something coming through.
+ If `ros2 topic hz /lidar_points` does not return any data, ROS 2 is likely not receiving the LiDAR data stream.
+
+ > **Note:** `ros2 topic hz` takes a few moments to calculate the publishing frequency, so do not expect an instantaneous result. With high data rates or large messages, the reported frequency may also be inaccurate. For troubleshooting purposes, the important thing is to verify that data is being received.
 
  ### **PTP**
  **Setting up nuc as PTP grandmaster**
