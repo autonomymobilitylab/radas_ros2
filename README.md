@@ -32,12 +32,14 @@ This guide contains information about many of the tools and procedures used duri
  1. Make sure you have the prerequisites listed above installed.
 
  2. Clone the repository and navigate to the `firmware` directory:
+
  ```shell
  git clone https://github.com/joevento/radas_ros2.git
  cd ./radas_ros2/firmware
  ```
 
  3. Manually start the container to make sure everything works as intended:
+
  ```shell
  docker compose up --build
  ```
@@ -65,6 +67,7 @@ This guide contains information about many of the tools and procedures used duri
  > **Note:** If the Users page is grayed out, click the **"Unlock..."** button in the top-right corner.
 
  9. Once the functionality of the system has been verified manually, run the systemd user service installation script from the `firmware` directory:
+
  ```shell
  ./install_service.sh
  ```
@@ -85,6 +88,8 @@ This guide contains information about many of the tools and procedures used duri
 
  > **Note:** It has been measured that, from a cold and dark state, the system takes approximately two (2) minutes to start before data acquisition can begin.
 
+## General testing and development tools
+
 ### **Pylonviewer quickstart outside of docker**
 
  1. Run pylonviewer from root:
@@ -103,7 +108,7 @@ This guide contains information about many of the tools and procedures used duri
  
 > **Note:** if pylonviewer doesn't find the camera automatically you can use `f12` or `camera -> Add Remote GigE Camera` to add your camera manually.
 
- 3. Reboot the system and relaunch pylonviewer to save the configuration settings. You're now able to see your attached cameras
+ 3. Reboot the system and relaunch pylonviewer to save the configuration settings. You're now able to see your attached cameras.
 
 ### **Docker**
 
@@ -118,28 +123,23 @@ This guide contains information about many of the tools and procedures used duri
  ```shell
  docker compose up --build -d
  ```
-
- 3. Connect with a shell:
-
- ```shell
- docker compose exec ros2_dev /bin/bash
- ```
-
- 4. If you want to use GUI apps inside the docker container run this before step 3. When running things remotely using ssh this needs to be ran on the local system before ssh connection is established.
+ 3. (optional) If you want to use GUI apps inside the docker container run this. When running things remotely using ssh this needs to be ran on the local system before ssh connection is established.
 
  ```shell
  xhost +local:docker
+ ```
+
+ 4. Connect with a shell:
+
+ ```shell
+ docker compose exec ros2_dev /bin/bash
  ```
 
  ### **Starting main ros package**
  1. Follow Docker startup instructions.
 
  2. Inside the container run:
- ```shell
- colcon build --packages-select radas_bringup --symlink-install
- ```
 
- 3. Launching radas ros:
  ```shell
  ros2 launch radas_bringup bringup.launch.py
  ```
@@ -233,12 +233,13 @@ This guide won't go over creating the workspace, cloning manufacturer drivers/SD
  ```
 
  If hz doesn't return anything, ros is not actually receiving the lidar datastream. 
-> **Note:** ros2 topic hz takes a few moments to calculate the frequency of data, don't expect instantaneous result.
+> **Note:** ros2 topic hz takes a few moments to calculate the frequency of data, don't expect instantaneous result. For high data size and frequency the actual Hz value might be wrong, you just want to see something coming through.
 
  ### **PTP**
  **Setting up nuc as PTP grandmaster**
 
  PTP is automatically set up when running ```docker compose up --build -d``` in a secondary container parallel to the main ros2 container. If you wish to manually broadcast PTP from your device for testing etc you can use:
+
  ```shell
  sudo PTP4l -i <device> -m -S
  ```
@@ -253,7 +254,7 @@ This guide won't go over creating the workspace, cloning manufacturer drivers/SD
  5. Next 4 bits are the microsecond part of UTC.
 
  ### **SSH access to NUC**
- The MS-01 NUC is set to accept SSH traffic on the default port. Connection details can be found physically on the machine. If a display is required, add the `-X` flag before `username@ip`.
+ The MS-01 NUC is set to accept SSH traffic on the default port. Connection details can be found physically on the machine. If a display is required, add the `-X` flag before `username@ip`. Won't go into details how this is setup but it's just a ssh server setup.
 
  For ease of development, local changes can be pushed to the NUC using `./firmware/sync_to_nuc.sh`. This allows changes made on the local system to be pushed to the NUC without going through GitHub.
  
@@ -266,27 +267,27 @@ This guide won't go over creating the workspace, cloning manufacturer drivers/SD
  The ROS 2 Docker stack can be started automatically on boot using the `systemd` service.
  
  The `.env` file should include:
- 
+
  ```shell
  PROJECT_DIR=/path/to/firmware/folder
  SERVICE_USER=localUser
  ```
  
  Make the installer executable and install the service:
- 
+
  ```shell
  chmod +x install_service.sh
  ./install_service.sh
  ```
  
  Start the service manually:
- 
+
  ```shell
  sudo systemctl start radas_ros2.service
  ```
  
  Follow logs:
- 
+
  ```shell
  journalctl -u radas_ros2.service -f
  ```
@@ -314,13 +315,13 @@ This guide won't go over creating the workspace, cloning manufacturer drivers/SD
  
 ### **STATUS PAGE**
 
-The status page provides a web interface for controlling data collection and monitoring sensor health. Sensor health is read through the standard ROS 2 diagnostics pipeline:
+ The status page provides a web interface for controlling data collection and monitoring sensor health. Sensor health is read through the standard ROS 2 diagnostics pipeline:
 
 ```text
 sensor diagnostic publishers -> /diagnostics -> diagnostic_aggregator -> /diagnostics_agg -> web UI
 ```
 
-The page shows a traffic-light sensor summary. The traffic-light table displays:
+ The page shows a traffic-light sensor summary. The traffic-light table displays:
 
 - Sensor status: green/yellow/red/black indicator
 - Sensor name
@@ -328,7 +329,9 @@ The page shows a traffic-light sensor summary. The traffic-light table displays:
 - Measured Hz compared against the expected Hz for that sensor type
 - PTP status for cameras and lidars, when exposed by diagnostics
 
-The final health level is based on the worse result between the ROS diagnostic level and the manual Hz check. IMU and GNSS do not use the PTP column.
+ The final health level is based on the worse result between the ROS diagnostic level and the manual Hz check. IMU and GNSS do not use the PTP column.
+
+ The web page can be ran manually with:
 
  1. Create and activate a Python virtual environment:
 
@@ -351,7 +354,7 @@ The final health level is based on the worse result between the ROS diagnostic l
    --params-file diagnostic_aggregator.yaml
  ```
 
- The aggregator config should use `analyzers` as the top-level node name and publish aggregated diagnostics on `/diagnostics_agg`. The web UI subscribes to `/diagnostics_agg`; individual sensor nodes should publish raw diagnostics to `/diagnostics`.
+ The aggregator config should use `analyzers` as the top-level node name and publish aggregated diagnostics on `/diagnostics_agg`. The web UI subscribes to `/diagnostics_agg`; individual sensor nodes should publish raw diagnostics to `/diagnostics` (if implemented in the driver).
 
  4. Launch the web server from a ROS-sourced terminal:
 
