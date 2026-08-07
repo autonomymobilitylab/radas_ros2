@@ -266,22 +266,40 @@ This guide contains information about many of the tools and procedures used duri
  > **Note:** `ros2 topic hz` takes a few moments to calculate the publishing frequency, so do not expect an instantaneous result. With high data rates or large messages, the reported frequency may also be inaccurate. For troubleshooting purposes, the important thing is to verify that data is being received.
 
  ### **PTP**
- **Setting up nuc as PTP grandmaster**
 
- PTP is automatically set up when running ```docker compose up --build -d``` in a secondary container parallel to the main ros2 container. If you wish to manually broadcast PTP from your device for testing etc you can use:
+ #### **Setting Up the NUC as a PTP Grandmaster**
+
+ PTP is automatically configured when running:
 
  ```shell
- sudo PTP4l -i <device> -m -S
+ docker compose up --build -d
  ```
- 
- The automatic PTP setup assumes that you have an ```.env``` file in your ```./firmware``` folder with the key ```PTP_INTERFACE=<device>```
 
- Both the JT128 and XT32M lidars format their timestamps in the data stream the same way, which you can find with the following steps.
- 1. From the end of the data packet find the manufacturer magic number ```42```.
- 2. Move back 10 bits.
- 3. First bit is ```year - 1900```.
- 4. Next 5 bits are in the order of: ```month, day, hour, minute, second```.
- 5. Next 4 bits are the microsecond part of UTC.
+ The PTP service runs in a secondary container alongside the main ROS 2 container.
+
+ To manually broadcast PTP from the device, for example for testing or troubleshooting, run:
+
+ ```shell
+ sudo ptp4l -i <device> -m -S
+ ```
+
+ The automatic PTP setup expects an `.env` file in the `./firmware` directory containing the network interface to use for PTP:
+
+ ```text
+ PTP_INTERFACE=<device>
+ ```
+
+ #### **LiDAR Timestamps**
+
+ Both the JT128 and XT32M LiDARs use the same timestamp format in their data packets. The timestamp can be located manually from the raw packet data in Wireshark as follows:
+
+ 1. Starting from the end of the packet, locate the manufacturer magic value `42` in the raw Wireshark output.
+ 2. From `42`, move back 10 bytes (10 two-character hexadecimal byte values in Wireshark).
+ 3. The first byte represents `year - 1900`.
+ 4. The next five bytes represent, in order:
+    `month, day, hour, minute, second`
+ 5. The final four bytes represent the microsecond component of the UTC timestamp.
+
 
  ### **SSH access to NUC**
  The MS-01 NUC is set to accept SSH traffic on the default port. Connection details can be found physically on the machine. If a display is required, add the `-X` flag before `username@ip`. Won't go into details how this is setup but it's just a ssh server setup.
