@@ -21,12 +21,69 @@ The sensors and their specifications are listed in more detail in the table belo
  - RTK-GPS: [Ardusimple simpleRTK 4 Heading](https://www.ardusimple.com/product/simplertk-4-heading/)
 
 # Guide
-Contains a lot of information on many tools used during development. Does not reflect the final deployed system.
+This guide contains information about many of the tools and procedures used during development. It does not necessarily reflect the final deployed system.
 
-### **Prerequisites**
+## **Prerequisites**
 
-- From [Ubuntu 24.04 Noble Numbat](https://releases.ubuntu.com/noble/)
-- From [Docker version 29.5.2, build 79eb04c](https://github.com/docker/docker-install)
+- [Ubuntu 24.04 LTS (Noble Numbat)](https://releases.ubuntu.com/noble/)
+- [Docker 29.5.2, build 79eb04c](https://github.com/docker/docker-install)
+
+## **Installation**
+ 1. Make sure you have the prerequisites listed above installed.
+
+ 2. Clone the repository and navigate to the `firmware` directory:
+ ```shell
+ git clone https://github.com/joevento/radas_ros2.git
+ cd ./radas_ros2/firmware
+ ```
+
+ 3. Manually start the container to make sure everything works as intended:
+ ```shell
+ docker compose up --build
+ ```
+
+ 4. Once the container has started successfully, navigate to `http://localhost:8080/` to access the system's web interface. Each sensor is displayed in its own table, with a traffic light indicator in the first column showing its general status. Verify that all sensors show a green status.
+
+ 5. Once the system's functionality has been verified, stop the container using `Ctrl+C`.
+
+ 6. Configure the NUC's network interface with the following static network settings:
+
+    * **IP address:** `192.168.1.2`
+    * **Subnet mask:** `255.255.255.0`
+
+    Once configured, the system's web interface can be accessed remotely at `http://192.168.1.2:8080/`.
+
+
+ 7. **(Optional)** Create an unprivileged user account under which the system will run.
+
+ 8. Regardless of whether you completed the optional step above, make sure the account used to run the system is automatically logged in at startup. This prevents the NUC from getting stuck on the login screen when the system is powered on.
+
+    Automatic login can be enabled in the Ubuntu settings under:
+
+    `System -> Users -> Automatic Login`
+
+ > **Note:** If the Users page is grayed out, click the **"Unlock..."** button in the top-right corner.
+
+ 9. Once the functionality of the system has been verified manually, run the systemd user service installation script from the `firmware` directory:
+ ```shell
+ ./install_service.sh
+ ```
+
+ The script installs and enables the systemd user service responsible for starting the RADAS ros2 system automatically when the user logs in.
+
+ 10. Once the service has been installed successfully, restart the NUC and enter the BIOS (typically by pressing `F2` or `Del`). In the BIOS, enable automatic startup when power is restored.
+
+     On the MS-01, this setting can be found under:
+
+     `Advanced -> ACPI -> Restore Power on AC Power Loss`
+
+     This ensures that the NUC boots and subsequently logs in automatically when the main power switch is turned on.
+
+ 11. Save the BIOS settings and exit. Allow the system to boot into Ubuntu, then navigate to `http://localhost:8080/` (or `http://192.168.1.2:8080/` when accessing remotely) and verify that all sensor status indicators are green.
+
+ 12. The system is now ready for use. From this point onward, it will automatically boot, log in, and start the RADAS ros2 system when the power switch on the side of the electrical cabinet is turned on.
+
+ > **Note:** It has been measured that, from a cold and dark state, the system takes approximately two (2) minutes to start before data acquisition can begin.
 
 ### **Pylonviewer quickstart outside of docker**
 
