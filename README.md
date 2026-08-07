@@ -352,49 +352,62 @@ This guide contains information about many of the tools and procedures used duri
 
  Running the camera wrapper this way is mainly useful for validating the broad functionality of the cameras inside ROS 2 and the container, as the standalone node does not provide much functionality by itself compared with the complete RADAS setup.
 
- ### **Running RADAS automatically on startup with systemd**
- The ROS 2 Docker stack can be started automatically on boot using the `systemd` service.
- 
- The `.env` file should include:
+ ### **Running RADAS Automatically on Startup with systemd**
+
+ The RADAS ROS 2 Docker stack can be started automatically using a systemd service.
+
+ For this the `.env` file in the `firmware` directory should contain:
 
  ```shell
  PROJECT_DIR=/path/to/firmware/folder
  SERVICE_USER=localUser
  ```
- 
- Make the installer executable and install the service:
+
+ `PROJECT_DIR` should point to the RADAS `firmware` directory, and `SERVICE_USER` should be the local user account under which the system runs.
+
+ #### **Installing the Service**
+
+ Make the installation script executable and run it:
 
  ```shell
  chmod +x install_service.sh
  ./install_service.sh
  ```
- 
- Start the service manually:
+
+ #### **Starting the Service Manually**
 
  ```shell
  sudo systemctl start radas_ros2.service
  ```
- 
- Follow logs:
+
+ #### **Viewing Logs**
+
+ Follow the service logs in real time:
 
  ```shell
  journalctl -u radas_ros2.service -f
  ```
- 
- Restart the service after changes:
- 
+
+ #### **Restarting the Service**
+
+ After making changes to the RADAS configuration or software, restart the service with:
+
  ```shell
  sudo systemctl restart radas_ros2.service
  ```
- 
- Disable autostart:
- 
+
+ #### **Disabling Automatic Startup**
+
+ To prevent the service from starting automatically:
+
  ```shell
  sudo systemctl disable radas_ros2.service
  ```
- 
- Remove the service completely:
- 
+
+ #### **Removing the Service**
+
+ To completely remove the RADAS systemd service:
+
  ```shell
  sudo systemctl stop radas_ros2.service
  sudo systemctl disable radas_ros2.service
