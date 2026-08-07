@@ -116,24 +116,27 @@ This guide contains information about many of the tools and procedures used duri
 
 ### **Docker**
 
- 1. Switch to firmware subfolder:
+ 1. Navigate to the `firmware` subdirectory:
 
  ```shell
  cd ./firmware/
  ```
 
- 2. Build the docker container:
+ 2. Build and start the Docker container in the background:
 
  ```shell
  docker compose up --build -d
  ```
- 3. (optional) If you want to use GUI apps inside the docker container run this. When running things remotely using ssh this needs to be ran on the local system before ssh connection is established.
+
+ 3. **(Optional)** To use GUI applications from inside the Docker container, allow local Docker containers to connect to the X server:
 
  ```shell
  xhost +local:docker
  ```
 
- 4. Connect with a shell:
+ > **Note:** When connecting to the system remotely via SSH, this command must be run on the local computer (e.g. laptop) before establishing the SSH connection.
+
+ 4. Open a shell inside the running container:
 
  ```shell
  docker compose exec ros2_dev /bin/bash
