@@ -1,8 +1,8 @@
 # Rugged ATV Data Acquisition System (RADAS)
 
-### **Collaborators:** 
+### **Collaborators:**
 
- - [Aalto University](https://www.aalto.fi/en): Joel Ventola, Otto Peltonen
+ - [Aalto University Autonomy & Mobility Lab](https://www.aalto.fi/en/department-of-energy-and-mechanical-engineering/autonomy-mobility-lab): Joel Ventola, Otto Peltonen
 
 # Overview
 
