@@ -88,27 +88,31 @@ This guide contains information about many of the tools and procedures used duri
 
  > **Note:** It has been measured that, from a cold and dark state, the system takes approximately two (2) minutes to start before data acquisition can begin.
 
-## General testing and development tools
+## General Testing and Development Tools
 
-### **Pylonviewer quickstart outside of docker**
+### **Pylon Viewer Quick Start Outside of Docker**
 
- 1. Run pylonviewer from root:
+ 1. Run Pylon Viewer as root:
 
  ```shell
  sudo /opt/pylon/bin/pylonviewer
  ```
 
- 2. Run pylonviewer GigE configurator:
+ 2. Open the Pylon Viewer GigE Configurator:
 
- `tools -> GigE configurator`
+    `Tools -> GigE Configurator`
 
- Choose 
- `Optimize complete system`
- and then run `Configure`
- 
-> **Note:** if pylonviewer doesn't find the camera automatically you can use `f12` or `camera -> Add Remote GigE Camera` to add your camera manually.
+    Select:
 
- 3. Reboot the system and relaunch pylonviewer to save the configuration settings. You're now able to see your attached cameras.
+    `Optimize Complete System`
+
+    Then click:
+
+    `Configure`
+
+ > **Note:** If Pylon Viewer does not detect the camera automatically, press `F12` or navigate to `Camera -> Add Remote GigE Camera` to add the camera manually.
+
+ 3. Reboot the system and relaunch Pylon Viewer to apply the configuration. The connected cameras should now be visible in Pylon Viewer.
 
 ### **Docker**
 
