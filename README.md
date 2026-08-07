@@ -142,14 +142,17 @@ This guide contains information about many of the tools and procedures used duri
  docker compose exec ros2_dev /bin/bash
  ```
 
- ### **Starting main ros package**
- 1. Follow Docker startup instructions.
+ ### **Starting the Main ROS 2 Package**
 
- 2. Inside the container run:
+ 1. Follow the Docker startup instructions above and open a shell inside the container.
+
+ 2. Inside the container, run:
 
  ```shell
  ros2 launch radas_bringup bringup.launch.py
  ```
+
+ This launches the main RADAS ROS 2 bringup package.
 
  ### **LIDARs** 
 
