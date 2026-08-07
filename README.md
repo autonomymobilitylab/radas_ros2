@@ -17,8 +17,7 @@ The sensors and their specifications are listed in more detail in the table belo
  - 32-channel 360° LIDAR: [Hesai XT32M2X](https://www.hesaitech.com/product/xt16-32-32m/)
  - 128-channel dome LIDAR: [Hesai JT128](https://www.hesaitech.com/product/jt128/)
  - 3 x RGB-cameras: [Basler a2A1920-51gcBAS](https://www.baslerweb.com/en/shop/a2a1920-51gcbas/)
- - NIR-camera: [Basler ace acA1300-60gmNIR](https://www.baslerweb.com/en/shop/aca1300-60gmnir/)
- - IMU: [VectorNav VN-100](https://www.vectornav.com/store/products/imu-ahrs/p/vn-100-rugged-imuahrs)
+ - IMU: [Xsens MTi-320-3A-SK](https://www.xsens.com/sensor-modules/xsens-mti-320)
  - RTK-GPS: [Ardusimple simpleRTK 4 Heading](https://www.ardusimple.com/product/simplertk-4-heading/)
 
 # Guide
