@@ -47,23 +47,20 @@ This guide contains information about many of the tools and procedures used duri
  NTRIPPASS=ntrip clients password (in finland use maanmittauslaitos password)
  ```
 
- 4. Manually start the container to make sure everything works as intended:
+ 4. Configure the NUC's network interface with the following static network settings:
+
+    * **IP address:** `192.168.1.2`
+    * **Subnet mask:** `255.255.255.0`
+
+ 5. Manually start the container to make sure everything works as intended:
 
  ```shell
  docker compose up --build
  ```
 
- 5. Once the container has started successfully, navigate to `http://localhost:8080/` to access the system's web interface. Each sensor is displayed in its own table, with a traffic light indicator in the first column showing its general status. Verify that all sensors show a green status.
+ 6. Once the container has started successfully, navigate to `http://localhost:8080/` (or `http://192.168.1.2:8080/` when remote) to access the system's web interface. Each sensor is displayed in its own table, with a traffic light indicator in the first column showing its general status. Verify that all sensors show a green status.
 
- 6. Once the system's functionality has been verified, stop the container using `Ctrl+C`.
-
- 7. Configure the NUC's network interface with the following static network settings:
-
-    * **IP address:** `192.168.1.2`
-    * **Subnet mask:** `255.255.255.0`
-
-    Once configured, the system's web interface can be accessed remotely at `http://192.168.1.2:8080/`.
-
+ 7. Once the system's functionality has been verified, stop the container using `Ctrl+C`.
 
  8. **(Optional)** Create an unprivileged user account under which the system will run.
 
