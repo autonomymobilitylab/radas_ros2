@@ -58,7 +58,7 @@ def generate_launch_description():
     )
     ntrip_client = ExecuteProcess(
         cmd=[
-            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/.venv/bin/python3",
             "/ros2_ws/src/ntrip_client/ros_ntrip_client.py",
         ],
         additional_env={
@@ -71,7 +71,7 @@ def generate_launch_description():
     )
     camera_configurator = ExecuteProcess(
         cmd=[
-            "/ros2_ws/src/.venv/bin/python3",
+            "/ros2_ws/.venv/bin/python3",
             "/ros2_ws/src/cameras/camera_configurator.py",
         ],
         cwd="/ros2_ws",
