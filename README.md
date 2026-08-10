@@ -25,8 +25,20 @@ This guide contains information about many of the tools and procedures used duri
 
 ## **Prerequisites**
 
+### **Software**
 - [Ubuntu 24.04 LTS (Noble Numbat)](https://releases.ubuntu.com/noble/)
 - [Docker 29.5.2, build 79eb04c](https://github.com/docker/docker-install)
+
+### **Hardware**
+- NUC/PC with adequite processing power, ram and storage space
+- Network switch with 10GigE upstream and POE functionality
+- Sensors listed in above table
+- USB gpio breakout board and RGB led
+- Power switch and power indicator led
+- IP rated enclosure for electronics
+- 12 to X volt converters for power
+- Router for wireless access to the lan network
+- Fusebox
 
 ## **Installation**
  1. Make sure you have the prerequisites listed above installed.
