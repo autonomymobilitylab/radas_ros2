@@ -8,17 +8,17 @@
 
 The Rugged ATV Data Acquisition System, or RADAS, is a versatile, rugged sensor rack designed to be mounted on the front cargo area of an ATV. With its modular design and small footprint, the system can also be mounted on other vehicles and platforms.
 
-The purpose of this system is to collect real-world data for state-of-the-art (SOTA) datasets in unstructured off-road environments, such as forests and other urban areas in Finland.
+The purpose of this system is to collect real-world data for state-of-the-art (SOTA) datasets in unstructured off-road environments, such as forests and other off-road areas in Finland.
 
 The system includes two different LiDAR sensors, three RGB cameras that provide a 170° field of view, a 9-DoF IMU, and an RTK-capable GNSS receiver. The system is also planned to be upgraded with an additional NIR (near-infrared) camera in the future.
 The sensors and their specifications are listed in more detail in the table below.
 
 ### **Sensors**
- - 32-channel 360° LIDAR: [Hesai XT32M2X](https://www.hesaitech.com/product/xt16-32-32m/)
- - 128-channel dome LIDAR: [Hesai JT128](https://www.hesaitech.com/product/jt128/)
+ - 32-channel 360° LiDAR: [Hesai XT32M2X](https://www.hesaitech.com/product/xt16-32-32m/)
+ - 128-channel dome LiDAR: [Hesai JT128](https://www.hesaitech.com/product/jt128/)
  - 3 x RGB-cameras: [Basler a2A1920-51gcBAS](https://www.baslerweb.com/en/shop/a2a1920-51gcbas/)
  - IMU: [Xsens MTi-320-3A-SK](https://www.xsens.com/sensor-modules/xsens-mti-320)
- - RTK-GPS: [Ardusimple simpleRTK 4 Heading](https://www.ardusimple.com/product/simplertk-4-heading/)
+ - RTK-GNSS: [Ardusimple simpleRTK 4 Heading](https://www.ardusimple.com/product/simplertk-4-heading/)
 
 # Guide
 This guide contains information about many of the tools and procedures used during development. It does not necessarily reflect the final deployed system.
@@ -66,13 +66,13 @@ This guide contains information about many of the tools and procedures used duri
 
  > **Note:** If the Users page is grayed out, click the **"Unlock..."** button in the top-right corner.
 
- 9. Once the functionality of the system has been verified manually, run the systemd user service installation script from the `firmware` directory:
+ 9. Once the functionality of the system has been verified manually, run the systemd service installation script from the `firmware` directory:
 
  ```shell
  ./install_service.sh
  ```
 
- The script installs and enables the systemd user service responsible for starting the RADAS ros2 system automatically when the user logs in.
+ The script installs and enables the systemd service responsible for starting the RADAS ROS 2 system automatically when the user logs in.
 
  10. Once the service has been installed successfully, restart the NUC and enter the BIOS (typically by pressing `F2` or `Del`). In the BIOS, enable automatic startup when power is restored.
 
@@ -84,7 +84,7 @@ This guide contains information about many of the tools and procedures used duri
 
  11. Save the BIOS settings and exit. Allow the system to boot into Ubuntu, then navigate to `http://localhost:8080/` (or `http://192.168.1.2:8080/` when accessing remotely) and verify that all sensor status indicators are green.
 
- 12. The system is now ready for use. From this point onward, it will automatically boot, log in, and start the RADAS ros2 system when the power switch on the side of the electrical cabinet is turned on.
+ 12. The system is now ready for use. From this point onward, it will automatically boot, log in, and start the RADAS ROS 2 system when the power switch on the side of the electrical cabinet is turned on.
 
  > **Note:** It has been measured that, from a cold and dark state, the system takes approximately two (2) minutes to start before data acquisition can begin.
 
