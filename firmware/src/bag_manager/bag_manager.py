@@ -49,7 +49,7 @@ class SystemRecorder(Node):
             ],
             MagneticField: ['/imu/mag'],
             GPSFix: ['/Gnss/gpsfix'],
-            TFMessage: ['/tf_static'],
+            TFMessage: ['/tf'],
         }
 
         self.bag_subscriptions = []
@@ -306,7 +306,8 @@ class SystemRecorder(Node):
 
     @staticmethod
     def get_ros_type_name(msg_type):
-        return f'{msg_type.__module__.replace(".", "/")}/{msg_type.__name__}'
+        package = msg_type.__module__.split('.')[0]
+        return f'{package}/msg/{msg_type.__name__}'
 
     @staticmethod
     def set_service_response(response, success=None, message=None):
