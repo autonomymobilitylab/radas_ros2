@@ -192,13 +192,13 @@
         output_date_rate_gyrohr: 1000
         # whether using high rate acceleration data(accelerationHR) to interpolate the orientation and rateofturnHR data.
         # when this is set to true, output_data_rate_acchr must >= output_date_rate_gyrohr
-        interpolate_orientation_high_rate: true
+        interpolate_orientation_high_rate: false
 
         # Filtering Option Flags 
         # -------------------------------------
-        enable_orientation_smoother: true #valid for MTi-G-710, MTi-670(G), MTi-680(G)
-        enable_position_velocity_smoother: true #valid for MTi-680(G) only
-        enable_continuous_zero_rotation_update: true #valid for MTi-680(G) only
+        enable_orientation_smoother: false #valid for MTi-G-710, MTi-670(G), MTi-680(G)
+        enable_position_velocity_smoother: false #valid for MTi-680(G) only
+        enable_continuous_zero_rotation_update: false #valid for MTi-680(G) only
 
         # Other option flags:
         # valid for MTi-2/3/7/8/20/30/620/630/670/680/200/300/710/Sirius/Avior
