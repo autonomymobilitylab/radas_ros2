@@ -34,7 +34,7 @@ SENSOR_DISPLAY_NAMES = {
     "Basler_right": "Camera Right",
     "Lidar 1": "Lidar XT",
     "Lidar 2": "Lidar JT",
-    "XSens IMU": "XSens IMU",
+    "IMU XSens IMU": "IMU",
 }
 
 RED = 1 << 0  # D0
