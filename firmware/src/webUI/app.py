@@ -24,7 +24,7 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 EXPECTED_HZ = {
     "lidar": 10.0,
     "camera": 10.0,
-    "imu": 1000.0,
+    "imu": 100.0,
     "gnss": 10.0,
 }
 

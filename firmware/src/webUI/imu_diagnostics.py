@@ -33,7 +33,7 @@ class ImuDiagnostics(Node):
     """Publish normalized XSens IMU diagnostics on /diagnostics."""
 
     TOPIC = "/imu/data"
-    EXPECTED_HZ = 1000.0
+    EXPECTED_HZ = 100.0
     RATE_WINDOW_SECONDS = 2.0
     MESSAGE_TIMEOUT_SECONDS = 2.0
 

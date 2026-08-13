@@ -501,7 +501,7 @@ Sensor diagnostic nodes
  ```text
  LiDAR:   10 Hz
  Camera:  10 Hz
- IMU:   1000 Hz
+ IMU:   100 Hz (fused)
  GNSS:    10 Hz
  ```
 
