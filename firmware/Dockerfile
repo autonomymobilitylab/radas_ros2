@@ -60,7 +60,7 @@ RUN mkdir -p src
 # Clone Hesai and Pylon
 RUN git clone --recursive https://github.com/HesaiTechnology/HesaiLidar_ROS_2.0.git src/hesai_ros_driver && \
     git clone https://github.com/basler/pylon-ros-camera.git src/pylon-ros2-camera && \
-    git clone -b ros2 https://github.com/xsenssupport/Xsens_MTi_ROS_Driver_and_Ntrip_Client.git src/xsens-mti-ros2
+    git clone -b ros2 https://github.com/qti-weijshen/Xsens_MTi_ROS_Driver_and_Ntrip_Client.git src/xsens-mti-ros2
 
 # Install dependencies using rosdep
 RUN apt-get update && \
