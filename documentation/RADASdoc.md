@@ -50,7 +50,7 @@ Ending and closing the recording happens via pressing the **```Stop recording```
 
 In case of a sudden shutdown of the system, the ROS 2 implementation of rosbag, the recording will still work due to using the MCAP-storage plugin, but all buffered frames will be lost, this will equal to around 5 frames. Reading the MCAP bag after an unexpected shutdown does require an external tool (not yet tested/covered). 
 ### Viewing and accessing the output data
-Output data location on the NUC is **```/home/amlab/radas_ros2/firmware/output_data/rosbags```**
+The output data location on the NUC is **```/home/amlab/radas_ros2/firmware/output_data/rosbags```**. The saved rosbags can be played back using ```rosbag play system_recording.bag```, this results in all the ros messages sent during the recording to be replayed. It should be noted that due to ros2 performance limitations viewing the images in real time might result in choppy playback. To export the data from the bag a python script can be used. MCAP is also just a standard database format so the data can be accessed with typical db tools.
 ___
 # Calibration
 Calibration is an important step of in the operation of the system, but it isn't listed in the usage section as the sensor rack calibration has to be repeated only when the system changes: components are replaced or their positions are moved relative to each other. 
