@@ -82,7 +82,8 @@ PTP's delay requests and responses, used for controlling the slave clock, can na
 We utilize the camera's ability to receive external hardware trigger signals. This signal is provided by the Ardusimple GNSS-module. To configure this signal, it's possible to use the manufacturer's RxControl-software under ==INSERT PATH HERE==. 
 ___
 # Troubleshooting
-### Viewing container/ROS 2 logs 
+### Viewing container/ROS 2 logs
+As the container is started as a systemd service viewing the logs live requires some extra tinkering. For this journalctl has to be used and the command for it is ```sudo journalctl -u radas_ros2.service -f```. The logs are also written into the current_boot.log file found in /logs along with the file for the previous bootup.
 
 ### Using the manufacturer device software
 - **RGB-Cameras: Basler PylonVIewer**
