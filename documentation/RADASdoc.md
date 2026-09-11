@@ -93,6 +93,7 @@ As the container is started as a systemd service viewing the logs live requires 
 - **GPS: RxControl**
 
 ### Not receiving data from LIDARS
+First things first make sure the nuc firewall is not blocking the communications. The lidar knows how to reply to pings so one can simply ping it to see if its alive and able to reply back. Wireshark (or similar) can be used to inspect the network traffic, filtering it to the ip of the lidar can be used to inspect the messages being sent.
 
 ### Not receiving data from cameras
 
