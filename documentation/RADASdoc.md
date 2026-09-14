@@ -43,6 +43,13 @@ The ROS2 rosbag functionality is used to implement sensor output data recording.
 
 Output data location on the NUC is **```/home/amlab/radas_ros2/firmware/output_data/rosbags```**
 ### Connecting to the system using a shell
+The NUC is configured to accept SSH connections on the default SSH port. The connection details can be found physically on the machine.
+
+To connect to the NUC, use (optionally if there is a need for a screen use -X flag):
+
+```shell
+ssh username@ip
+```
 
 ### Finalizing the recording and turning off the system
 Ending and closing the recording happens via pressing the **```Stop recording```** button in the Web UI. This safely finalizes and closes the current rosbag, after which the system can simply be powered off via flipping the main power switch. 
