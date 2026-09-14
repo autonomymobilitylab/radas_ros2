@@ -65,11 +65,11 @@ Calibration is an important step of in the operation of the system, but it isn't
 For both types of calibration, you will need the specific kind of calibration target suitable for the type of calibration. Both targets can be found at the garage.
 ### Intrinsic calibration
 - Calibration target: checkerboard pattern target
-==PICTURE OF TARGET==
+![Image of intrinsic calibration target](./images/intrinsic.jpeg)
 Intrinsic calibration is used to determine the focal length, principal points and lens distortion of the cameras. Knowing these values, we can correct the lens distortion introduced especially by wide-FOV lenses to achieve a flatter, rectified image. 
 ### Extrinsic calibration
 - Calibration target: target with ArUco Markers and 3 circular cutouts
-==PICTURE OF TARGET==
+![Image of extrinsic calibration targe](./images/extrinsic.jpeg)
 
 Extrinsic calibration is used to determine the translation and rotation matrices between the "root" sensor (XT32 LIDAR) and one of the 4 remaining sensors (JT128 LIDAR or Basler RGB cameras). Knowing these translation and rotation matrices between the sensors enables us to overlap and align their data ==PICTURE OF THE ALIGNED FRAMES==. 
 >**Note:** You can use the big CTOUCH-screen located at the garage to have an easier time viewing your target positioning
